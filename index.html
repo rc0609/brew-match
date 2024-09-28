@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Sign Up</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="firebaseauth.js"></script>
+  </head>
+  <body>
+    <div id="full-page-container">
+      <div id="container">
+        <!-- Login Form -->
+        <div id="login-form" class="form-container">
+          <h2>Log In</h2>
+          <div id="login-message" class="message" style="display: none"></div>
+          <div class="input-div">
+            <p>Email</p>
+            <input type="text" id="login-email" />
+          </div>
+          <div class="input-div">
+            <p>Password</p>
+            <input type="password" id="login-password" />
+          </div>
+          <div class="button-container">
+            <button id="login-button">Log In</button>
+          </div>
+          <div class="switch-container">
+
+            <p>
+              Don't have an account?
+              <button id="switch-to-signup">Sign Up</button>
+            </p>
+          </div>
+        </div>
+
+        <!-- Sign Up Form -->
+        <div id="signup-form" class="form-container hidden">
+          <h2>Create New Account</h2>
+          <div id="signup-message" class="message" style="display: none"></div>
+          <div class="input-div">
+            <p>Email</p>
+            <input type="text" id="email-signup" />
+          </div>
+          <div class="name-input">
+            <div id="first-name-input">
+              <p>First Name</p>
+              <input type="text" id="fName-signup" />
+            </div>
+            <div id="last-name-input">
+              <p>Last Name</p>
+              <input type="text" id="lName-signup" />
+            </div>
+          </div>
+
+          <div class="input-div">
+            <p>Password</p>
+            <input type="password" id="pWord-signup" />
+          </div>
+          <div class="button-container">
+            <button id="signup-button">Sign Up</button>
+          </div>
+          <div class="switch-container">
+            <p>
+              Already have an account?
+              <button id="switch-to-login">Sign In</button>
+            </p>
+          </div>
+        </div>
+      </div>
+    <script src="script.js"></script>
+  </body>
+</html>
