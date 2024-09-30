@@ -47,10 +47,11 @@ const analytics = getAnalytics(app);
 
 function displayMessage(message, divId) {
   let msg = document.getElementById(divId);
-  msg.style.display = "block";
+  msg.classList.remove("hidden");
   msg.innerHTML = message;
   msg.style.opacity = 1;
 }
+
 const signUp = document.getElementById("signup-button");
 signUp.addEventListener("click", (event) => {
   event.preventDefault();

@@ -38,6 +38,17 @@ p {
   justify-content: center;
 }
 
+.login-or-signup {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#continue-as-guest a {
+  text-align: center;
+  text-decoration: none;
+}
+
 .form-container {
   display: flex;
   flex-direction: column;

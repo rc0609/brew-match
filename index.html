@@ -10,10 +10,22 @@
   <body>
     <div id="full-page-container">
       <div id="container">
+        <div id="login-or-signup">
+          <h2>Discover Your Ideal Cafe!</h2>
+          <div class="switch-container">
+            <button id="go-to-signup">Sign Up</button>
+          </div>
+          <div class="switch-container">
+            <button id="go-to-login">Log In</button>
+          </div>
+          <div id="continue-as-guest">
+            <a href="homepage.html"><p>Continue as guest</p></a>
+          </div>
+        </div>
         <!-- Login Form -->
-        <div id="login-form" class="form-container">
+        <div id="login-form" class="form-container hidden">
           <h2>Log In</h2>
-          <div id="login-message" class="message" style="display: none"></div>
+          <div id="login-message" class="message hidden"></div>
           <div class="input-div">
             <p>Email</p>
             <input type="text" id="login-email" />
@@ -26,7 +38,6 @@
             <button id="login-button">Log In</button>
           </div>
           <div class="switch-container">
-
             <p>
               Don't have an account?
               <button id="switch-to-signup">Sign Up</button>
@@ -37,7 +48,7 @@
         <!-- Sign Up Form -->
         <div id="signup-form" class="form-container hidden">
           <h2>Create New Account</h2>
-          <div id="signup-message" class="message" style="display: none"></div>
+          <div id="signup-message" class="message hidden"></div>
           <div class="input-div">
             <p>Email</p>
             <input type="text" id="email-signup" />
@@ -52,7 +63,6 @@
               <input type="text" id="lName-signup" />
             </div>
           </div>
-
           <div class="input-div">
             <p>Password</p>
             <input type="password" id="pWord-signup" />
