@@ -8,6 +8,7 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInAnonymously,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 import {
@@ -112,5 +113,41 @@ signIn.addEventListener("click", (event) => {
       } else {
         displayMessage("Account does not Exist", "login-message");
       }
+    });
+});
+
+const guestSignInButton = document.getElementById("guest-signin-button");
+guestSignInButton.addEventListener("click", (event) => {
+  event.preventDefault();
+  const auth = getAuth();
+  const db = getFirestore();
+
+  signInAnonymously(auth)
+    .then(() => {
+      // Signed in anonymously
+      const user = auth.currentUser;
+      displayMessage("Signed in as Guest!", "guest-signin-message");
+      localStorage.setItem("loggedInUserId", user.uid);
+
+      // Create a user document if it doesn't exist
+      const userRef = doc(db, "users", user.uid);
+      return setDoc(
+        userRef,
+        {
+          email: null,
+          firstName: null,
+          lastName: null,
+          isAnonymous: true,
+        },
+        { merge: true }
+      );
+    })
+    .then(() => {
+      window.location.href = "homepage.html";
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      displayMessage(`Error: ${errorMessage}`, "guest-signin-message");
     });
 });

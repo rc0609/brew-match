@@ -38,13 +38,19 @@ p {
   justify-content: center;
 }
 
+.img-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .login-or-signup {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-#continue-as-guest a {
+#guest-signin-button a {
   text-align: center;
   text-decoration: none;
 }
@@ -105,7 +111,7 @@ button {
   text-decoration: underline;
   border-radius: 10px;
   text-decoration: none;
-  margin-left: 1rem;
+
   width: 11rem;
   height: 3.4rem;
   font-size: 1.3rem;
@@ -130,6 +136,9 @@ button:hover {
 
 .hidden {
   display: none;
+}
+
+#logo {
 }
 
 .message {

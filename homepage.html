@@ -3,9 +3,160 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>BREW Match Homepage</title>
+    <link rel="stylesheet" href="homepage.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
   </head>
+
   <body>
-    <div>Homepage</div>
+    <header class="header">
+      <a href="#" class="logo">
+        <img src="img/brew-match-logo-black.png" alt="Brew Match logo" />
+      </a>
+      <!--logo close-->
+      <nav class="navigation-bar">
+        <a href="#">Quiz</a>
+        <a href="#">Profiles</a>
+        <a href="#">About</a>
+        <div class="search-box">
+          <input type="text" />
+          <i class="fa fa-search" style="color: #593d3b"></i>
+        </div>
+        <!--search-box close-->
+      </nav>
+      <!--navigation-bar close-->
+    </header>
+    <!--header close-->
+
+    <main>
+      <div class="intro">
+        <h1>The largest community<br />of coffee enthusiasts</h1>
+        <button>Explore</button>
+      </div>
+      <!--intro close-->
+
+      <div class="design-rec">
+        <div id="green-rec"></div>
+        <div id="gray-rec"></div>
+      </div>
+      <!--design-rec close-->
+
+      <div class="quiz-paragraphs">
+        <h2>
+          Personalized quiz to find out your new<br />favorite coffee shop!
+        </h2>
+        <div id="paragraph-container">
+          <div id="left-paragraph">
+            <p class="quiz-heading">Lifestyle</p>
+            <p class="quiz-text">
+              Share a bit about your routine and vibe-wheter you're a night owl
+              or a<br />
+              morning person. We'll suggest spots that fits seamlessly into your
+              lifestyle.
+            </p>
+            <p class="quiz-heading">Hobbies</p>
+            <p class="quiz-text">
+              Tell us about your favorite pastime! Wheter you're into art,
+              music, or outdoor<br />
+              activities. We'll match you with a coffee shop that complements
+              your creative or<br />
+              adventurous spirit.
+            </p>
+          </div>
+          <!--left-paragraph close-->
+          <div id="right-paragraph">
+            <p class="quiz-heading">Food and Beverage preferences</p>
+            <p class="quiz-text">
+              Are you a dessert lover, vegan, or a fan of speciality coffee? Let
+              us know your<br />
+              go-to orders, and we'll find coffee shops that serve up exactly
+              what you
+            </p>
+            <p class="quiz-heading">Usage Context</p>
+            <p class="quiz-text">
+              Looking for a quiet study nook, a place to catch up with friends,
+              or somewhere<br />
+              cozy to work remotely? We'll help you find the perfect coffee shop
+              for any occasion.
+            </p>
+          </div>
+          <!--right-paragraph close-->
+        </div>
+        <!--paragraph-container close-->
+        <div class="quiz-button-container">
+          <button>Take the quiz!</button>
+        </div>
+        <!--quiz-button-container close-->
+      </div>
+      <!--quiz-paragraphs-->
+
+      <div class="barista-profile-section">
+        <div class="barista-circles">
+          <div id="circle1"></div>
+          <div id="circle2"></div>
+        </div>
+        <!--barista-circles close-->
+        <div class="barista-profile-paragraphs">
+          <p id="barista-profile-heading">You're in good company</p>
+          <p id="barista-profile-text">
+            Meet the baristas behind your perfect brew!
+          </p>
+        </div>
+        <!--barista-profile-paragraphs-->
+        <div class="barista-profile-list"></div>
+        <!--barista-profile-list close-->
+      </div>
+      <!--barista-profile-section close-->
+
+      <div class="search-option-container">
+        <div class="search-option-content">
+          <p class="search-option-text">
+            "Prefer to explore on your own? Browse our curated<br />
+            directory of local coffee shops and find your perfect<br />spot!"
+          </p>
+          <div class="search-option-button-container">
+            <button>Search</button>
+          </div>
+          <!-- search-option-button-container -->
+        </div>
+        <!-- search-option-content -->
+      </div>
+      <!-- search-option-container -->
+    </main>
+    <!--main close-->
+    <footer>
+      <div class="footer-navigation">
+        <div class="footer-navigation-text">
+          <div id="footer-navigation-left">
+            <a href="#">Mobile App</a>
+            <a href="#">Community</a>
+            <a href="#">Company</a>
+          </div>
+          <!--footer-navigation-left-close-->
+          <div class="footer-logo">
+            <img
+              src="img/brew-match-logo-black.png"
+              alt="Brew Match logo Footer"
+              style="width: 170px; height: auto"
+            />
+          </div>
+          <!--footer-logo close-->
+          <div id="footer-navigation-right">
+            <a href="#">Help Desk</a>
+            <a href="#">Blog</a>
+            <a href="#">Resources</a>
+          </div>
+          <!--footer-navigation-right close-->
+        </div>
+        <!--footer-navigation-text close-->
+      </div>
+      <!--footer-navigation close-->
+      <div class="outro"></div>
+      <!--outro close-->
+    </footer>
+    <!--footer close-->
   </body>
 </html>
