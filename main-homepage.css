@@ -1,0 +1,345 @@
+* {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0px;
+    padding: 0; 
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FFFFFF;
+}
+
+.header .logo img{
+    padding:2px;
+    width:120px;
+    height:auto;
+}
+
+.navigation-bar {
+    padding: 8px;
+    display: flex;
+    width:30%;
+    justify-content: space-around;
+}
+
+.navigation-bar a{
+    color: #593D3B
+}
+
+.navigation-bar a:hover {
+    color: #A3B18A; /* Optional hover color */
+}
+
+.search-box {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.search-box input {
+    width: 110px;
+    height: 18px;
+    padding: 5px;
+    border: solid #593D3B;
+    border-radius: 20px;
+    margin-top: 2px;
+}
+
+.search-box i {
+    display: flex;
+    justify-content: flex-end;
+    margin-left: 10px;
+    margin-top: 2px;
+}
+
+.intro {
+    height: 700px;
+    background-image: url("img/coffee.jpg");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.intro h1{
+    font-size: 3.7em;
+    margin-bottom: 35px;
+    font-weight: 350;
+}
+
+.intro button{
+  background: none;
+  border: 1px solid white;
+  color: white;
+  cursor:pointer;
+  background-color: #593d3b;
+  text-decoration: underline;
+  border-radius: 10px;
+  text-decoration: none;
+  margin-left: 1rem;
+  width: 11rem;
+  height: 3.4rem;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.intro button:hover {
+    background-color: #382423;
+    transition-duration: 500ms;
+}
+
+.intro button:active { /*Might wanna add on the login page*/
+    transform: scale(0.95);
+}
+
+.design-rec {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: end;
+    height: 100px;
+}
+
+#green-rec {
+    width: 50%;
+    height: 30px;
+    background: #A3B18A;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+#gray-rec {
+    width:35%;
+    height: 30px;
+    background: #DAD7CD;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.quiz-paragraphs {
+    padding: 0px;
+    margin-left: 60px;
+    height: 600px;
+}
+
+.quiz-paragraphs h2{
+    font-size: 2.5em;
+    margin-bottom: 50px;
+    font-weight: 370;
+    font-size: 3.2em;
+}
+
+#paragraph-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+#right-paragraph {
+    margin-right: 80px;
+}
+
+.quiz-heading {
+    font-size: 1.6em;
+    font-weight: 650;
+    margin-bottom: 30px;
+}
+
+.quiz-text {
+    font-size: 1em;
+    font-weight: 350;
+    margin-bottom: 50px;
+
+}
+
+.quiz-button-container{
+    display: flex;
+    justify-content: center;
+}
+
+.quiz-paragraphs button{
+    background: none;
+    background-color: transparent;
+    color: #593D3B;
+    border: 1px solid #593D3B;
+    border-radius: 6px;
+    width: 8rem;
+    height: 2.5rem;
+    font-size: 1rem;
+    font-weight: 495;
+    cursor:pointer;
+    text-align: center;
+    margin-right: 2rem;
+}
+
+.quiz-paragraphs button:hover {
+    background-color: #ffeec2;
+    transition-duration: 500ms;
+}
+
+.quiz-paragraphs button:active { 
+    transform: scale(0.95);
+}
+
+.barista-profile-section {
+    position: relative; 
+    height: auto;
+    width: auto;
+}
+
+#barista-circles{
+    position: absolute; 
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: flex-start;
+    width: 120px;
+}
+
+#circle1{
+    background: #AB947E;
+    border-radius: 50%;
+    height: 200px;
+    width: 200px;
+    margin-left: -70px; 
+    position: relative;
+}
+
+#circle2 {
+    background: #C3A995;
+    border-radius: 50%;
+    height: 250px;
+    width: 250px;
+    margin-top: -150px;
+}
+
+.barista-profile-paragraphs {
+    margin-top: -130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    
+}
+
+#barista-profile-heading {
+    font-size: 2.9rem;
+    margin-bottom: 30px;
+    font-weight: 370;
+    color: #593D3B;
+}
+
+#barista-profile-text{
+    font-size: 2.3rem;
+    font-weight: 340;
+    color: #344E41;
+}
+
+
+.barista-profile-list{
+    height: 500px;
+}
+
+.search-option-container {
+    background: #f2f2f2;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-option-content {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 200px; 
+    color: #344E41;
+}
+
+.search-option-text {
+    margin: 0;
+    font-size: 2.2rem;
+    font-weight: 360;
+    padding-right: 20px;
+} 
+
+.search-option-button-container button {
+    background: none;
+    background-color: #FFFFFF;
+    color: #593D3B;
+    border: 2px solid #593D3B;
+    border-radius: 6px;
+    width: 9rem;
+    height: 2.7rem;
+    font-size: 1.1rem;
+    font-weight: 495;
+    cursor:pointer;
+    text-align: center;
+    margin-right: 2rem;
+}
+
+.search-option-button-container button:hover {
+    background-color: #d7d7d7;
+    transition-duration: 500ms;
+}
+
+.search-option-button-container button:active {
+    transform: scale(0.95);
+}
+
+.footer-navigation {
+    display: flex;
+    justify-content: center; 
+    padding: 10px; 
+    height:auto;
+     
+}
+
+.footer-navigation-text {
+    display: flex;
+    justify-content: space-between; 
+    width: 80%; 
+    border-bottom: 1px solid #000000;
+    padding: 30px 0;
+}
+
+#footer-navigation-left,
+#footer-navigation-right {
+    display: flex; 
+    gap: 60px; 
+    align-self: center;
+}
+
+.footer-navigation a {
+    font-weight: 500;
+    color: #000000; 
+    transition: color 0.3s; 
+}
+
+.footer-navigation a:hover {
+    color: #A3B18A; 
+}
+
+.footer-logo{
+    display: flex;
+    justify-content: center;
+}
+
+.outro {
+height: 200px;
+}
+
+
+
+
