@@ -107,8 +107,8 @@
 }
 
 .background-section {
-    height: 210px; /* Adjust the height as needed */
-    background-image: url("img/subpage-banner.png"); /* Path to your image */
+    height: 250px; /* Adjust the height as needed */
+    background-image: url("img/subpage-banner.jpg"); /* Path to your image */
     background-size: cover;
     background-position: center;
     display: flex;
@@ -133,20 +133,41 @@
 
 
 .text-container {
-    display: flex;             
-    justify-content: center;   
-    align-items: center;       
-    padding-top: 20px;   
-    margin: 0 15px;
-    color: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    margin-left: 500px;
+    margin-right: 500px;
 }
-.text-container p {
-    margin: 0 15px;               /* Space between items */
+.text-container a {
     background-color: #a8917e;
+    border-radius: 10px;
     padding: 5px;
-    border-radius: 5px;
+    color: #FFFFFF;
+    font-weight: 600;
     
 }
+
+#menu-nav {
+    background-color: #000000;
+    border-radius: 10px;
+    padding: 5px;
+    color: #FFFFFF;
+}
+
+#menu-nav:hover{
+    color: #a8917e;
+}
+
+.text-container a:hover{
+    color: #000000;
+}
+
+.text-container a:active {
+    transform: scale(0.95);
+}
+
+
 .squares-container {
     display: flex;              
     flex-wrap: wrap;           
