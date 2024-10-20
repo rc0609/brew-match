@@ -140,6 +140,7 @@
     padding: 5px;
     color: #FFFFFF;
     font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 #barista-nav {
@@ -150,11 +151,13 @@
 }
 
 #barista-nav:hover{
-    color: #a8917e;
+    background-color: #C3A995;
+    color: #593B3D;
 }
 
 .text-container a:hover{
-    color: #000000;
+    background-color: #C3A995;
+    color: #593B3D;
 }
 
 .text-container a:active {
@@ -185,6 +188,7 @@ body {
     font-size: 12px; /* Reduced font size */
     padding-top: 50px; /* Optional: Adds extra space from the top */
 }
+
 
 
 
