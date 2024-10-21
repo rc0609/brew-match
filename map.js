@@ -6,6 +6,18 @@ const options = {
 };
 
 /**
+ * **[ADDED]** Price Level Mapping from string to integer
+ */
+const PRICE_LEVEL_MAPPING = {
+  PRICE_LEVEL_UNSPECIFIED: 0,
+  PRICE_LEVEL_INEXPENSIVE: 1,
+  PRICE_LEVEL_MODERATE: 2,
+  PRICE_LEVEL_EXPENSIVE: 3,
+  PRICE_LEVEL_VERY_EXPENSIVE: 4,
+  // PRICE_LEVEL_FREE is handled separately if needed
+};
+
+/**
  * Converts a numeric rating into a string of star emojis.
  * @param {number} rating - The rating value (e.g., 4.3).
  * @returns {string} - A string of star emojis representing the rating.
@@ -113,6 +125,9 @@ function success(pos) {
 
       if (response.ok) {
         displayPlaces(result.places || []);
+
+        // **[ADDED]** Send fetched coffee shops to the backend for storage
+        await sendCoffeeShopsToBackend(result.places || []);
       } else {
         displayError(result.error.message || "Failed to fetch nearby places");
       }
@@ -123,6 +138,67 @@ function success(pos) {
   };
 
   fetchNearbyPlaces();
+
+  /**
+   * **[ADDED]** Sends the fetched coffee shops data to the backend API for storage.
+   * @param {Array} places - Array of place objects from the Places API.
+   */
+  const sendCoffeeShopsToBackend = async (places) => {
+    if (places.length === 0) return; // Nothing to send
+
+    // **[MODIFIED]** Extract and structure only the necessary fields for ML with priceLevel as integer
+    const structuredPlaces = places.map((place) => ({
+      name: place.displayName.text || "Unnamed Coffee Shop",
+      location: place.location
+        ? {
+            latitude: place.location.latitude,
+            longitude: place.location.longitude,
+          }
+        : { latitude: null, longitude: null },
+      rating: place.rating || 0.0,
+      userRatingCount: place.userRatingCount || 0, // Assuming 'userRatingCount' corresponds to 'user_ratings_total'
+      priceLevel: PRICE_LEVEL_MAPPING[place.priceLevel] || 0, // **[MODIFIED]** Mapping priceLevel string to integer
+      types: place.types || [],
+      formattedAddress: place.formattedAddress || "Address not available",
+      businessStatus: place.businessStatus || "UNKNOWN",
+      currentOpeningHours: place.currentOpeningHours || {},
+      servesCoffee: place.servesCoffee || false,
+      servesDessert: place.servesDessert || false,
+      takeout: place.takeout || false,
+      delivery: place.delivery || false,
+      dineIn: place.dineIn || false,
+      paymentOptions: place.paymentOptions || {},
+      parkingOptions: place.parkingOptions || {},
+      accessibilityOptions: place.accessibilityOptions || {},
+    }));
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/store-coffee-shops/",
+        {
+          // **[MODIFIED]** Backend API endpoint
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ coffee_shops: structuredPlaces }), // **[MODIFIED]** Sending the structured data
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to store coffee shops.");
+      }
+
+      console.log("Coffee shops successfully stored in the database.");
+    } catch (error) {
+      console.error("Error storing coffee shops:", error);
+      // Optionally display an error message to the user
+      const errorDiv = document.getElementById("error");
+      errorDiv.textContent = "Failed to store coffee shops in the database.";
+    }
+  };
 
   /**
    * Displays the list of coffee shops and adds markers to the map.
@@ -163,13 +239,9 @@ function success(pos) {
       address.textContent = place.formattedAddress || "Address not available";
       listItem.appendChild(address);
 
-      const rating = document.createElement("p");
-      rating.classList.add("place-rating");
-      rating.textContent = place.rating || "Rating not available";
-      listItem.appendChild(rating);
-
-      // Place Rating using Emojis
+      // Place Rating
       if (place.rating) {
+        // **[MODIFIED]** Check if rating exists before displaying
         const rating = place.rating; // Rating is typically a float between 1 and 5
         const ratingEmojis = getEmojiRating(rating);
 
