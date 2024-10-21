@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-P4sGmMTkSm4IY+qIeh6VZgrN/++bNgcGDtrAdVXliE3c+vqJH0Q6C6FQ7y5xoLlkMAdZzFlEQE0WkCyF+a9FFg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <title>Nearby Coffee Shops</title>
+    <script
+      async
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E&loading=async&callback=initMap"
+    ></script>
+    <!-- Link to CSS -->
+    <link rel="stylesheet" href="mapstyles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="img-container">
+        <a href="homepage.html">
+          <img id="logo" src="/img/brew-match-logo-black.png" />
+        </a>
+      </div>
+      <h1>Nearby Coffee Shops</h1>
+      <div id="map" style="height: 400px; width: 100%; margin-top: 20px"></div>
+      <!-- Error Message -->
+      <div id="error" class="error"></div>
+
+      <!-- Loading Indicator -->
+      <div id="loading" class="loading">Loading...</div>
+
+      <!-- Coffee Shops List -->
+      <ul id="places-list" class="places-list"></ul>
+    </div>
+
+    <script src="map.js"></script>
+  </body>
+</html>

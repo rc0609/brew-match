@@ -9,6 +9,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInAnonymously,
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 import {
