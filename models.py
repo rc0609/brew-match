@@ -17,6 +17,8 @@ class CoffeeShop(BaseModel):
     currentOpeningHours: Optional[dict] = {}
     servesCoffee: bool
     servesDessert: bool
+    servesBreakfast: bool
+    liveMusic: bool
     takeout: bool
     delivery: bool
     dineIn: bool

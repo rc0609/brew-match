@@ -1,27 +1,18 @@
-const apiKey = "AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E"; // Replace with your API key
+const apiKey = "AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E";
 
 const options = {
   enableHighAccuracy: true,
   maximumAge: 0,
 };
 
-/**
- * **[ADDED]** Price Level Mapping from string to integer
- */
 const PRICE_LEVEL_MAPPING = {
   PRICE_LEVEL_UNSPECIFIED: 0,
   PRICE_LEVEL_INEXPENSIVE: 1,
   PRICE_LEVEL_MODERATE: 2,
   PRICE_LEVEL_EXPENSIVE: 3,
   PRICE_LEVEL_VERY_EXPENSIVE: 4,
-  // PRICE_LEVEL_FREE is handled separately if needed
 };
 
-/**
- * Converts a numeric rating into a string of star emojis.
- * @param {number} rating - The rating value (e.g., 4.3).
- * @returns {string} - A string of star emojis representing the rating.
- */
 function getEmojiRating(rating) {
   const fullStar = "⭐";
   const emptyStar = "☆";
@@ -50,12 +41,9 @@ function success(pos) {
   console.log(pos.coords.latitude);
 
   let map;
-  let markers = []; // Array to store marker instances
-  let infoWindow; // Single InfoWindow instance
+  let markers = [];
+  let infoWindow;
 
-  /**
-   * Initializes the Google Map centered at the user's location.
-   */
   function initMap() {
     // Initialize the map
     map = new google.maps.Map(document.getElementById("map"), {
@@ -89,10 +77,6 @@ function success(pos) {
   }
 
   initMap();
-
-  /**
-   * Fetches nearby coffee shops using the Google Places API.
-   */
   const fetchNearbyPlaces = async () => {
     const url = "https://places.googleapis.com/v1/places:searchNearby";
 
@@ -125,8 +109,6 @@ function success(pos) {
 
       if (response.ok) {
         displayPlaces(result.places || []);
-
-        // **[ADDED]** Send fetched coffee shops to the backend for storage
         await sendCoffeeShopsToBackend(result.places || []);
       } else {
         displayError(result.error.message || "Failed to fetch nearby places");
@@ -140,13 +122,11 @@ function success(pos) {
   fetchNearbyPlaces();
 
   /**
-   * **[ADDED]** Sends the fetched coffee shops data to the backend API for storage.
-   * @param {Array} places - Array of place objects from the Places API.
+ @param {Array} places - Array of place objects from the Places API.
    */
   const sendCoffeeShopsToBackend = async (places) => {
     if (places.length === 0) return; // Nothing to send
 
-    // **[MODIFIED]** Extract and structure only the necessary fields for ML with priceLevel as integer
     const structuredPlaces = places.map((place) => ({
       name: place.displayName.text || "Unnamed Coffee Shop",
       location: place.location
@@ -156,14 +136,16 @@ function success(pos) {
           }
         : { latitude: null, longitude: null },
       rating: place.rating || 0.0,
-      userRatingCount: place.userRatingCount || 0, // Assuming 'userRatingCount' corresponds to 'user_ratings_total'
-      priceLevel: PRICE_LEVEL_MAPPING[place.priceLevel] || 0, // **[MODIFIED]** Mapping priceLevel string to integer
+      userRatingCount: place.userRatingCount || 0,
+      priceLevel: PRICE_LEVEL_MAPPING[place.priceLevel] || 0,
       types: place.types || [],
       formattedAddress: place.formattedAddress || "Address not available",
       businessStatus: place.businessStatus || "UNKNOWN",
       currentOpeningHours: place.currentOpeningHours || {},
       servesCoffee: place.servesCoffee || false,
       servesDessert: place.servesDessert || false,
+      servesBreakfast: place.servesBreakfast || false,
+      liveMusic: place.liveMusic || false,
       takeout: place.takeout || false,
       delivery: place.delivery || false,
       dineIn: place.dineIn || false,
@@ -238,6 +220,11 @@ function success(pos) {
       address.classList.add("place-address");
       address.textContent = place.formattedAddress || "Address not available";
       listItem.appendChild(address);
+
+      const rating = document.createElement("p");
+      rating.classList.add("place-rating");
+      rating.textContent = place.rating || "Address not available";
+      listItem.appendChild(rating);
 
       // Place Rating
       if (place.rating) {
