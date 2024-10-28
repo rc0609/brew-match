@@ -51,69 +51,137 @@ csv_lock = asyncio.Lock()
 class StoreRequest(BaseModel):
     coffee_shops: List[CoffeeShop]
 
+
+async def ensure_csv_exists():
+    csv_file = 'coffee_shops.csv'
+    if not os.path.exists(csv_file):
+        logger.info("CSV file not found. Creating from database entries...")
+
+        shops = list(collection.find())
+
+        if shops:
+            headers = [
+                "id", "name", "latitude", "longitude", "rating", "userRatingCount",
+                "priceLevel", "types", "formattedAddress", "businessStatus",
+                "currentOpeningHours", "servesCoffee", "servesDessert",
+                "servesBreakfast", "liveMusic", "takeout", "delivery",
+                "dineIn", "paymentOptions", "parkingOptions", "accessibilityOptions"
+            ]
+
+            try:
+                async with csv_lock:
+                    with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+                        writer = csv.DictWriter(file, fieldnames=headers)
+                        writer.writeheader()
+
+                        for shop in shops:
+                            row = {
+                                "id": shop.get("id", ""),
+                                "name": shop.get("name", ""),
+                                "latitude": shop.get("location", {}).get("latitude", ""),
+                                "longitude": shop.get("location", {}).get("longitude", ""),
+                                "rating": shop.get("rating", ""),
+                                "userRatingCount": shop.get("userRatingCount", ""),
+                                "priceLevel": shop.get("priceLevel", ""),
+                                "types": ";".join(shop.get("types", [])),
+                                "formattedAddress": shop.get("formattedAddress", ""),
+                                "businessStatus": shop.get("businessStatus", ""),
+                                "currentOpeningHours": str(shop.get("currentOpeningHours", {})),
+                                "servesCoffee": shop.get("servesCoffee", False),
+                                "servesDessert": shop.get("servesDessert", False),
+                                "servesBreakfast": shop.get("servesBreakfast", False),
+                                "liveMusic": shop.get("liveMusic", False),
+                                "takeout": shop.get("takeout", False),
+                                "delivery": shop.get("delivery", False),
+                                "dineIn": shop.get("dineIn", False),
+                                "paymentOptions": str(shop.get("paymentOptions", {})),
+                                "parkingOptions": str(shop.get("parkingOptions", {})),
+                                "accessibilityOptions": str(shop.get("accessibilityOptions", {})),
+                            }
+                            writer.writerow(row)
+
+                logger.info(f"Created CSV file with {len(shops)} existing entries from database.")
+            except Exception as e:
+                logger.error(f"Failed to create CSV file: {str(e)}")
+        else:
+            logger.info("No entries in database to create CSV file.")
+
+
 @app.post("/api/store-coffee-shops/")
-def store_coffee_shops(request: StoreRequest):
-    new_shops = 0
+async def store_coffee_shops(request: StoreRequest):
+    await ensure_csv_exists()
+
+    stored_count = 0
+    updated_count = 0
+    skipped_count = 0
+
     for shop in request.coffee_shops:
         shop_dict = shop.dict()
 
-        # Check if shop already exists
-        existing_shop = collection.find_one({"id": shop_dict["id"]})
+        try:
+            existing_shop = collection.find_one({"id": shop_dict["id"]})
 
-        if not existing_shop:
-            try:
+            if not existing_shop:
                 collection.insert_one(shop_dict)
-                new_shops += 1
-                logger.info(f"Added new coffee shop: {shop.name}")
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Error storing coffee shop '{shop.name}': {str(e)}")
-        else:
-            logger.info(f"Skipped duplicate coffee shop: {shop.name}")
+                stored_count += 1
+                await append_to_csv(shop_dict)
+                logger.info(f"Stored new coffee shop: {shop.name}")
+            else:
+                has_changes = any(
+                    existing_shop.get(key) != shop_dict.get(key)
+                    for key in shop_dict
+                    if key != '_id'
+                )
+
+                if has_changes:
+                    collection.update_one(
+                        {"id": shop_dict["id"]},
+                        {"$set": shop_dict}
+                    )
+                    await append_to_csv(shop_dict)
+                    updated_count += 1
+                    logger.info(f"Updated existing coffee shop: {shop.name}")
+                else:
+                    skipped_count += 1
+                    logger.info(f"Skipped unchanged coffee shop: {shop.name}")
+
+        except Exception as e:
+            logger.error(f"Error processing coffee shop '{shop.name}': {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error storing coffee shop '{shop.name}': {str(e)}"
+            )
 
     return {
-        "message": f"Process completed. Added {new_shops} new coffee shops. {len(request.coffee_shops) - new_shops} duplicates skipped."
+        "message": "Coffee shops processing completed.",
+        "stats": {
+            "new_stores": stored_count,
+            "updated_stores": updated_count,
+            "skipped_stores": skipped_count,
+            "total_processed": stored_count + updated_count + skipped_count
+        }
     }
-
 
 async def append_to_csv(document):
     csv_file = 'coffee_shops.csv'
 
-    # First check if this ID already exists in the CSV
     exists = False
+    rows = []
     if os.path.exists(csv_file):
         try:
             with open(csv_file, mode='r', newline='', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
-                exists = any(row.get('id') == document.get('id') for row in reader)
+                rows = list(reader)
+                exists = any(row.get('id') == document.get('id') for row in rows)
         except Exception as e:
             logger.error(f"Error checking CSV for duplicates: {str(e)}")
 
-    if exists:
-        logger.info(f"Skipped duplicate CSV entry for: {document.get('name')}")
-        return
-
     headers = [
-        "id",
-        "name",
-        "latitude",
-        "longitude",
-        "rating",
-        "userRatingCount",
-        "priceLevel",
-        "types",
-        "formattedAddress",
-        "businessStatus",
-        "currentOpeningHours",
-        "servesCoffee",
-        "servesDessert",
-        "servesBreakfast",
-        "liveMusic",
-        "takeout",
-        "delivery",
-        "dineIn",
-        "paymentOptions",
-        "parkingOptions",
-        "accessibilityOptions"
+        "id", "name", "latitude", "longitude", "rating", "userRatingCount",
+        "priceLevel", "types", "formattedAddress", "businessStatus",
+        "currentOpeningHours", "servesCoffee", "servesDessert",
+        "servesBreakfast", "liveMusic", "takeout", "delivery",
+        "dineIn", "paymentOptions", "parkingOptions", "accessibilityOptions"
     ]
 
     row = {
@@ -141,13 +209,25 @@ async def append_to_csv(document):
     }
 
     async with csv_lock:
-        file_exists = os.path.isfile(csv_file)
         try:
-            with open(csv_file, mode='a', newline='', encoding='utf-8') as file:
-                writer = csv.DictWriter(file, fieldnames=headers)
-                if not file_exists:
+            if exists:
+                for i, existing_row in enumerate(rows):
+                    if existing_row.get('id') == document.get('id'):
+                        rows[i] = row
+                        break
+
+                with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+                    writer = csv.DictWriter(file, fieldnames=headers)
                     writer.writeheader()
-                writer.writerow(row)
+                    writer.writerows(rows)
+                logger.info(f"Updated coffee shop '{row['name']}' in CSV.")
+            else:
+                file_exists = os.path.isfile(csv_file)
+                with open(csv_file, mode='a', newline='', encoding='utf-8') as file:
+                    writer = csv.DictWriter(file, fieldnames=headers)
+                    if not file_exists:
+                        writer.writeheader()
+                    writer.writerow(row)
                 logger.info(f"Appended coffee shop '{row['name']}' to CSV.")
         except Exception as e:
             logger.error(f"Failed to write to CSV: {str(e)}")
@@ -169,12 +249,10 @@ def watch_coffee_shops_sync():
 async def initial_export():
     csv_file = 'coffee_shops.csv'
 
-    # Get unique documents from MongoDB
     unique_shops = list(collection.find())
     unique_ids = set()
     filtered_shops = []
 
-    # Filter out duplicates based on ID
     for shop in unique_shops:
         if shop.get('id') not in unique_ids:
             unique_ids.add(shop.get('id'))

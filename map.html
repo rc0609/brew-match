@@ -14,10 +14,14 @@
               type="text"
               id="search-input"
               placeholder="Search coffee shops..."
+              autocomplete="off"
+              spellcheck="false"
+              role="search"
+              onkeydown="return event.key != 'Enter';"
             />
           </div>
           <div class="filter-buttons">
-            <button id="filter-chains" class="filter-btn">
+            <button id="filter-chains" class="filter-btn" type="button">
               Hide Chain Stores
             </button>
           </div>
