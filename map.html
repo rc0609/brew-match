@@ -1,26 +1,11 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      integrity="sha512-P4sGmMTkSm4IY+qIeh6VZgrN/++bNgcGDtrAdVXliE3c+vqJH0Q6C6FQ7y5xoLlkMAdZzFlEQE0WkCyF+a9FFg=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <title>Nearby Coffee Shops</title>
-    <script
-      async
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E&loading=async&callback=initMap"
-    ></script>
-    <!-- Link to CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coffee Shop Finder</title>
     <link rel="stylesheet" href="mapstyles.css" />
   </head>
   <body>
-    <h1>Nearby Coffee Shops</h1>
     <div class="container">
       <div class="sidebar">
         <div class="search-container">
@@ -44,7 +29,7 @@
       <div id="map"></div>
     </div>
 
-    <!-- Link to JavaScript -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E&libraries=places"></script>
     <script src="map.js"></script>
   </body>
 </html>

@@ -6,6 +6,7 @@ class Location(BaseModel):
     longitude: Optional[float]
 
 class CoffeeShop(BaseModel):
+    id: str
     name: str
     location: Location
     rating: float

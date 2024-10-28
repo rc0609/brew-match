@@ -5,6 +5,14 @@ const options = {
   maximumAge: 0,
 };
 
+const PRICE_LEVEL_MAPPING = {
+  PRICE_LEVEL_UNSPECIFIED: 0,
+  PRICE_LEVEL_INEXPENSIVE: 1,
+  PRICE_LEVEL_MODERATE: 2,
+  PRICE_LEVEL_EXPENSIVE: 3,
+  PRICE_LEVEL_VERY_EXPENSIVE: 4,
+};
+
 const CHAIN_STORES = [
   "starbucks",
   "mcdonald",
@@ -18,24 +26,14 @@ const CHAIN_STORES = [
   "seattle's best coffee",
 ];
 
-let hideChains = false;
-
-const PRICE_LEVEL_MAPPING = {
-  PRICE_LEVEL_UNSPECIFIED: 0,
-  PRICE_LEVEL_INEXPENSIVE: 1,
-  PRICE_LEVEL_MODERATE: 2,
-  PRICE_LEVEL_EXPENSIVE: 3,
-  PRICE_LEVEL_VERY_EXPENSIVE: 4,
-};
-
 let allPlaces = [];
+let hideChains = false;
 
 function getEmojiRating(rating) {
   const fullStar = "⭐";
   const emptyStar = "☆";
 
   const roundedRating = Math.round(rating * 2) / 2;
-
   const fullStars = Math.floor(roundedRating);
   const halfStar = roundedRating - fullStars === 0.5 ? 1 : 0;
   const emptyStars = 5 - fullStars - halfStar;
@@ -49,7 +47,6 @@ function getEmojiRating(rating) {
 
 function success(pos) {
   const crd = pos.coords;
-
   console.log("Your current position is:");
   console.log(`Latitude : ${crd.latitude}`);
   console.log(`Longitude: ${crd.longitude}`);
@@ -88,8 +85,6 @@ function success(pos) {
     });
   }
 
-  initMap();
-
   function initializeSearch() {
     const searchInput = document.getElementById("search-input");
     const filterChainsBtn = document.getElementById("filter-chains");
@@ -100,23 +95,23 @@ function success(pos) {
       filterChainsBtn.textContent = hideChains
         ? "Show All Stores"
         : "Hide Chain Stores";
-      filterPlaces(searchInput.value.toLowerCase().trim());
+      filterAndDisplayPlaces();
     });
 
     let debounceTimeout;
     searchInput.addEventListener("input", () => {
       clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        filterPlaces(searchTerm);
+        filterAndDisplayPlaces();
       }, 300);
     });
   }
 
-  function filterPlaces(searchTerm) {
-    if (!allPlaces) return;
+  function filterAndDisplayPlaces() {
+    const searchInput = document.getElementById("search-input");
+    const searchTerm = searchInput.value.toLowerCase().trim();
 
-    let filteredPlaces = allPlaces;
+    let filteredPlaces = [...allPlaces];
 
     if (searchTerm) {
       filteredPlaces = filteredPlaces.filter((place) =>
@@ -166,9 +161,8 @@ function success(pos) {
 
       if (response.ok) {
         allPlaces = result.places || [];
-        displayPlaces(result.places || []);
+        filterAndDisplayPlaces();
         await sendCoffeeShopsToBackend(result.places || []);
-        initializeSearch();
       } else {
         displayError(result.error.message || "Failed to fetch nearby places");
       }
@@ -178,10 +172,22 @@ function success(pos) {
     }
   };
 
+  async function initialize() {
+    try {
+      initMap();
+      initializeSearch();
+      await fetchNearbyPlaces();
+    } catch (error) {
+      console.error("Initialization error:", error);
+      displayError("Failed to initialize the application.");
+    }
+  }
+
   const sendCoffeeShopsToBackend = async (places) => {
     if (places.length === 0) return;
 
     const structuredPlaces = places.map((place) => ({
+      id: place.id,
       name: place.displayName.text || "Unnamed Coffee Shop",
       location: place.location
         ? {
@@ -317,14 +323,14 @@ function success(pos) {
 
         marker.addListener("click", () => {
           const contentString = `
-              <div>
-                <strong>${
-                  place.displayName.text || "Unnamed Coffee Shop"
-                }</strong><br>
-                ${place.formattedAddress || "Address not available"}<br>
-                ${place.rating ? `Rating: ${getEmojiRating(place.rating)}` : ""}
-              </div>
-            `;
+            <div>
+              <strong>${
+                place.displayName.text || "Unnamed Coffee Shop"
+              }</strong><br>
+              ${place.formattedAddress || "Address not available"}<br>
+              ${place.rating ? `Rating: ${getEmojiRating(place.rating)}` : ""}
+            </div>
+          `;
           infoWindow.setContent(contentString);
           infoWindow.open(map, marker);
         });
@@ -334,7 +340,18 @@ function success(pos) {
     if (markers.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       markers.forEach((marker) => bounds.extend(marker.getPosition()));
-      map.fitBounds(bounds);
+
+      if (markers.length === 1) {
+        map.setCenter(markers[0].getPosition());
+        map.setZoom(17);
+      } else {
+        map.fitBounds(bounds);
+        google.maps.event.addListenerOnce(map, "bounds_changed", () => {
+          if (map.getZoom() > 16) {
+            map.setZoom(16);
+          }
+        });
+      }
     }
   };
 
@@ -353,7 +370,7 @@ function success(pos) {
     markers = [];
   };
 
-  fetchNearbyPlaces();
+  initialize();
 }
 
 function error(err) {

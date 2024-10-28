@@ -53,36 +53,71 @@ class StoreRequest(BaseModel):
 
 @app.post("/api/store-coffee-shops/")
 def store_coffee_shops(request: StoreRequest):
+    new_shops = 0
     for shop in request.coffee_shops:
-
         shop_dict = shop.dict()
 
-        try:
-            collection.update_one(
-                {"name": shop_dict["name"], "location.latitude": shop_dict["location"]["latitude"], "location.longitude": shop_dict["location"]["longitude"]},
-                {"$set": shop_dict},
-                upsert=True
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error storing coffee shop '{shop.name}': {str(e)}")
+        # Check if shop already exists
+        existing_shop = collection.find_one({"id": shop_dict["id"]})
 
-    return {"message": "Coffee shops stored successfully."}
+        if not existing_shop:
+            try:
+                collection.insert_one(shop_dict)
+                new_shops += 1
+                logger.info(f"Added new coffee shop: {shop.name}")
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error storing coffee shop '{shop.name}': {str(e)}")
+        else:
+            logger.info(f"Skipped duplicate coffee shop: {shop.name}")
+
+    return {
+        "message": f"Process completed. Added {new_shops} new coffee shops. {len(request.coffee_shops) - new_shops} duplicates skipped."
+    }
+
 
 async def append_to_csv(document):
-
     csv_file = 'coffee_shops.csv'
 
+    # First check if this ID already exists in the CSV
+    exists = False
+    if os.path.exists(csv_file):
+        try:
+            with open(csv_file, mode='r', newline='', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                exists = any(row.get('id') == document.get('id') for row in reader)
+        except Exception as e:
+            logger.error(f"Error checking CSV for duplicates: {str(e)}")
+
+    if exists:
+        logger.info(f"Skipped duplicate CSV entry for: {document.get('name')}")
+        return
 
     headers = [
-        "name", "latitude", "longitude", "rating", "userRatingCount",
-        "priceLevel", "types", "formattedAddress", "businessStatus",
-        "currentOpeningHours", "servesCoffee", "servesDessert",
-        "servesBreakfast", "liveMusic", "takeout", "delivery",
-        "dineIn", "paymentOptions", "parkingOptions", "accessibilityOptions"
+        "id",
+        "name",
+        "latitude",
+        "longitude",
+        "rating",
+        "userRatingCount",
+        "priceLevel",
+        "types",
+        "formattedAddress",
+        "businessStatus",
+        "currentOpeningHours",
+        "servesCoffee",
+        "servesDessert",
+        "servesBreakfast",
+        "liveMusic",
+        "takeout",
+        "delivery",
+        "dineIn",
+        "paymentOptions",
+        "parkingOptions",
+        "accessibilityOptions"
     ]
 
-
     row = {
+        "id": document.get("id", ""),
         "name": document.get("name", ""),
         "latitude": document.get("location", {}).get("latitude", ""),
         "longitude": document.get("location", {}).get("longitude", ""),
@@ -106,18 +141,12 @@ async def append_to_csv(document):
     }
 
     async with csv_lock:
-
         file_exists = os.path.isfile(csv_file)
-
         try:
             with open(csv_file, mode='a', newline='', encoding='utf-8') as file:
                 writer = csv.DictWriter(file, fieldnames=headers)
-
-
                 if not file_exists:
                     writer.writeheader()
-
-
                 writer.writerow(row)
                 logger.info(f"Appended coffee shop '{row['name']}' to CSV.")
         except Exception as e:
@@ -136,14 +165,43 @@ def watch_coffee_shops_sync():
     except Exception as e:
         logger.error(f"Unexpected error in change stream: {str(e)}")
 
+
 async def initial_export():
     csv_file = 'coffee_shops.csv'
+
+    # Get unique documents from MongoDB
+    unique_shops = list(collection.find())
+    unique_ids = set()
+    filtered_shops = []
+
+    # Filter out duplicates based on ID
+    for shop in unique_shops:
+        if shop.get('id') not in unique_ids:
+            unique_ids.add(shop.get('id'))
+            filtered_shops.append(shop)
+
     headers = [
-        "name", "latitude", "longitude", "rating", "userRatingCount",
-        "priceLevel", "types", "formattedAddress", "businessStatus",
-        "currentOpeningHours", "servesCoffee", "servesDessert",
-        "servesBreakfast", "liveMusic", "takeout", "delivery",
-        "dineIn", "paymentOptions", "parkingOptions", "accessibilityOptions"
+        "id",
+        "name",
+        "latitude",
+        "longitude",
+        "rating",
+        "userRatingCount",
+        "priceLevel",
+        "types",
+        "formattedAddress",
+        "businessStatus",
+        "currentOpeningHours",
+        "servesCoffee",
+        "servesDessert",
+        "servesBreakfast",
+        "liveMusic",
+        "takeout",
+        "delivery",
+        "dineIn",
+        "paymentOptions",
+        "parkingOptions",
+        "accessibilityOptions"
     ]
 
     file_exists = os.path.isfile(csv_file)
@@ -155,8 +213,9 @@ async def initial_export():
                 writer = csv.DictWriter(file, fieldnames=headers)
                 writer.writeheader()
 
-                for shop in collection.find():
+                for shop in filtered_shops:
                     row = {
+                        "id": shop.get("id", ""),
                         "name": shop.get("name", ""),
                         "latitude": shop.get("location", {}).get("latitude", ""),
                         "longitude": shop.get("location", {}).get("longitude", ""),
@@ -179,7 +238,7 @@ async def initial_export():
                         "accessibilityOptions": str(shop.get("accessibilityOptions", {})),
                     }
                     writer.writerow(row)
-            logger.info("Initial export completed.")
+            logger.info(f"Initial export completed. Exported {len(filtered_shops)} unique coffee shops.")
         except Exception as e:
             logger.error(f"Failed during initial export: {str(e)}")
 
