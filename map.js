@@ -5,6 +5,21 @@ const options = {
   maximumAge: 0,
 };
 
+const CHAIN_STORES = [
+  "starbucks",
+  "mcdonald",
+  "dunkin",
+  "costa coffee",
+  "caribou coffee",
+  "peet's coffee",
+  "tim hortons",
+  "the coffee bean",
+  "tully's coffee",
+  "seattle's best coffee",
+];
+
+let hideChains = false;
+
 const PRICE_LEVEL_MAPPING = {
   PRICE_LEVEL_UNSPECIFIED: 0,
   PRICE_LEVEL_INEXPENSIVE: 1,
@@ -13,11 +28,12 @@ const PRICE_LEVEL_MAPPING = {
   PRICE_LEVEL_VERY_EXPENSIVE: 4,
 };
 
+let allPlaces = [];
+
 function getEmojiRating(rating) {
   const fullStar = "⭐";
   const emptyStar = "☆";
 
-  // Round the rating to the nearest half
   const roundedRating = Math.round(rating * 2) / 2;
 
   const fullStars = Math.floor(roundedRating);
@@ -45,16 +61,13 @@ function success(pos) {
   let infoWindow;
 
   function initMap() {
-    // Initialize the map
     map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: crd.latitude, lng: crd.longitude },
       zoom: 14,
     });
 
-    // Initialize a single InfoWindow instance
     infoWindow = new google.maps.InfoWindow();
 
-    // Add a marker for the user's location
     const userMarker = new google.maps.Marker({
       position: { lat: crd.latitude, lng: crd.longitude },
       map: map,
@@ -69,7 +82,6 @@ function success(pos) {
       },
     });
 
-    // Add click listener to user marker
     userMarker.addListener("click", () => {
       infoWindow.setContent("<strong>Your Location</strong>");
       infoWindow.open(map, userMarker);
@@ -77,6 +89,51 @@ function success(pos) {
   }
 
   initMap();
+
+  function initializeSearch() {
+    const searchInput = document.getElementById("search-input");
+    const filterChainsBtn = document.getElementById("filter-chains");
+
+    filterChainsBtn.addEventListener("click", () => {
+      hideChains = !hideChains;
+      filterChainsBtn.classList.toggle("active");
+      filterChainsBtn.textContent = hideChains
+        ? "Show All Stores"
+        : "Hide Chain Stores";
+      filterPlaces(searchInput.value.toLowerCase().trim());
+    });
+
+    let debounceTimeout;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        filterPlaces(searchTerm);
+      }, 300);
+    });
+  }
+
+  function filterPlaces(searchTerm) {
+    if (!allPlaces) return;
+
+    let filteredPlaces = allPlaces;
+
+    if (searchTerm) {
+      filteredPlaces = filteredPlaces.filter((place) =>
+        place.displayName.text.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    if (hideChains) {
+      filteredPlaces = filteredPlaces.filter((place) => {
+        const placeName = place.displayName.text.toLowerCase();
+        return !CHAIN_STORES.some((chain) => placeName.includes(chain));
+      });
+    }
+
+    displayPlaces(filteredPlaces);
+  }
+
   const fetchNearbyPlaces = async () => {
     const url = "https://places.googleapis.com/v1/places:searchNearby";
 
@@ -108,8 +165,10 @@ function success(pos) {
       const result = await response.json();
 
       if (response.ok) {
+        allPlaces = result.places || [];
         displayPlaces(result.places || []);
         await sendCoffeeShopsToBackend(result.places || []);
+        initializeSearch();
       } else {
         displayError(result.error.message || "Failed to fetch nearby places");
       }
@@ -119,13 +178,8 @@ function success(pos) {
     }
   };
 
-  fetchNearbyPlaces();
-
-  /**
- @param {Array} places - Array of place objects from the Places API.
-   */
   const sendCoffeeShopsToBackend = async (places) => {
-    if (places.length === 0) return; // Nothing to send
+    if (places.length === 0) return;
 
     const structuredPlaces = places.map((place) => ({
       name: place.displayName.text || "Unnamed Coffee Shop",
@@ -158,12 +212,11 @@ function success(pos) {
       const response = await fetch(
         "http://127.0.0.1:8000/api/store-coffee-shops/",
         {
-          // **[MODIFIED]** Backend API endpoint
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ coffee_shops: structuredPlaces }), // **[MODIFIED]** Sending the structured data
+          body: JSON.stringify({ coffee_shops: structuredPlaces }),
         }
       );
 
@@ -176,78 +229,75 @@ function success(pos) {
       console.log("Coffee shops successfully stored in the database.");
     } catch (error) {
       console.error("Error storing coffee shops:", error);
-      // Optionally display an error message to the user
       const errorDiv = document.getElementById("error");
       errorDiv.textContent = "Failed to store coffee shops in the database.";
     }
   };
 
-  /**
-   * Displays the list of coffee shops and adds markers to the map.
-   * @param {Array} places - Array of place objects from the Places API.
-   */
   const displayPlaces = (places) => {
     const placesList = document.getElementById("places-list");
     const loading = document.getElementById("loading");
     const errorDiv = document.getElementById("error");
 
-    // Clear previous content and markers
     placesList.innerHTML = "";
     clearMarkers();
     loading.style.display = "none";
     errorDiv.textContent = "";
 
     if (places.length === 0) {
-      placesList.innerHTML = "<li>No coffee shops found in this area.</li>";
+      placesList.innerHTML =
+        "<li class='place-item'>No coffee shops found matching your search.</li>";
       return;
     }
 
-    console.log(places);
-
     places.forEach((place) => {
-      // Create list item
       const listItem = document.createElement("li");
       listItem.classList.add("place-item");
 
-      // Place Name
       const name = document.createElement("h2");
       name.classList.add("place-name");
       name.textContent = place.displayName.text || "Unnamed Coffee Shop";
       listItem.appendChild(name);
 
-      // Place Address
       const address = document.createElement("p");
       address.classList.add("place-address");
       address.textContent = place.formattedAddress || "Address not available";
       listItem.appendChild(address);
 
-      const rating = document.createElement("p");
-      rating.classList.add("place-rating");
-      rating.textContent = place.rating || "Address not available";
-      listItem.appendChild(rating);
-
-      // Place Rating
       if (place.rating) {
-        // **[MODIFIED]** Check if rating exists before displaying
-        const rating = place.rating; // Rating is typically a float between 1 and 5
-        const ratingEmojis = getEmojiRating(rating);
-
+        const ratingEmojis = getEmojiRating(place.rating);
         const ratingElement = document.createElement("div");
         ratingElement.classList.add("place-rating");
-        ratingElement.textContent = ratingEmojis;
-
-        // Accessibility: Add ARIA label
+        ratingElement.textContent = `${ratingEmojis} (${place.rating})`;
         ratingElement.setAttribute(
           "aria-label",
-          `Rating: ${rating} out of 5 stars`
+          `Rating: ${place.rating} out of 5 stars`
         );
-
         listItem.appendChild(ratingElement);
       }
 
+      listItem.addEventListener("click", () => {
+        if (place.location) {
+          const position = {
+            lat: place.location.latitude,
+            lng: place.location.longitude,
+          };
+          map.setCenter(position);
+          map.setZoom(16);
+
+          const marker = markers.find(
+            (m) =>
+              m.getPosition().lat() === position.lat &&
+              m.getPosition().lng() === position.lng
+          );
+          if (marker) {
+            google.maps.event.trigger(marker, "click");
+          }
+        }
+      });
+
       placesList.appendChild(listItem);
 
-      // Add marker to the map for this place
       if (
         place.location &&
         typeof place.location.latitude === "number" &&
@@ -260,12 +310,11 @@ function success(pos) {
           },
           map: map,
           title: place.displayName.text || "Unnamed Coffee Shop",
+          animation: google.maps.Animation.DROP,
         });
 
-        // Store the marker for future management (e.g., clearing markers)
         markers.push(marker);
 
-        // Add click listener to open an info window
         marker.addListener("click", () => {
           const contentString = `
               <div>
@@ -273,7 +322,7 @@ function success(pos) {
                   place.displayName.text || "Unnamed Coffee Shop"
                 }</strong><br>
                 ${place.formattedAddress || "Address not available"}<br>
-                Rating: ${place.rating || "N/A"} ⭐
+                ${place.rating ? `Rating: ${getEmojiRating(place.rating)}` : ""}
               </div>
             `;
           infoWindow.setContent(contentString);
@@ -281,12 +330,14 @@ function success(pos) {
         });
       }
     });
+
+    if (markers.length > 0) {
+      const bounds = new google.maps.LatLngBounds();
+      markers.forEach((marker) => bounds.extend(marker.getPosition()));
+      map.fitBounds(bounds);
+    }
   };
 
-  /**
-   * Displays an error message to the user.
-   * @param {string} message - The error message to display.
-   */
   const displayError = (message) => {
     const errorDiv = document.getElementById("error");
     const loading = document.getElementById("loading");
@@ -297,13 +348,12 @@ function success(pos) {
     errorDiv.textContent = message;
   };
 
-  /**
-   * Clears all markers from the map.
-   */
   const clearMarkers = () => {
     markers.forEach((marker) => marker.setMap(null));
     markers = [];
   };
+
+  fetchNearbyPlaces();
 }
 
 function error(err) {

@@ -20,17 +20,28 @@
     <link rel="stylesheet" href="mapstyles.css" />
   </head>
   <body>
+    <h1>Nearby Coffee Shops</h1>
     <div class="container">
-      <h1>Nearby Coffee Shops</h1>
-      <div id="map" style="height: 400px; width: 100%; margin-top: 20px"></div>
-      <!-- Error Message -->
-      <div id="error" class="error"></div>
-
-      <!-- Loading Indicator -->
-      <div id="loading" class="loading">Loading...</div>
-
-      <!-- Coffee Shops List -->
-      <ul id="places-list" class="places-list"></ul>
+      <div class="sidebar">
+        <div class="search-container">
+          <div class="search-wrapper">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search coffee shops..."
+            />
+          </div>
+          <div class="filter-buttons">
+            <button id="filter-chains" class="filter-btn">
+              Hide Chain Stores
+            </button>
+          </div>
+        </div>
+        <div id="error"></div>
+        <div id="loading">Loading nearby coffee shops...</div>
+        <ul id="places-list" class="places-list"></ul>
+      </div>
+      <div id="map"></div>
     </div>
 
     <!-- Link to JavaScript -->
