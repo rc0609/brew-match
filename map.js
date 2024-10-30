@@ -98,7 +98,6 @@ function success(pos) {
     const filterChainsBtn = document.getElementById("filter-chains");
     let hasSearched = false;
 
-    // Filter button handler
     filterChainsBtn.addEventListener("click", (e) => {
       hideChains = !hideChains;
       filterChainsBtn.classList.toggle("active");
@@ -108,12 +107,10 @@ function success(pos) {
       filterAndDisplayPlaces();
     });
 
-    // Search handler with debounce
     let debounceTimeout = null;
     searchInput.addEventListener("input", function (e) {
       if (!hasSearched) {
         hasSearched = true;
-        // Force a one-time reset of the search behavior
         setTimeout(() => {
           const event = new Event("input");
           searchInput.dispatchEvent(event);
@@ -130,7 +127,6 @@ function success(pos) {
         if (searchTerm.length > 0) {
           fetchPlacesWithSearch(searchTerm);
         } else {
-          // If search is cleared, show filtered version of initial places
           let filteredPlaces = [...allPlaces];
           if (hideChains) {
             filteredPlaces = filteredPlaces.filter((place) => {
@@ -143,7 +139,6 @@ function success(pos) {
       }, 300);
     });
 
-    // Prevent default search behavior
     searchInput.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -155,11 +150,9 @@ function success(pos) {
     const searchInput = document.getElementById("search-input");
     const searchTerm = searchInput.value.toLowerCase().trim();
 
-    // If there's a search term, fetch new places
     if (searchTerm.length > 0) {
       fetchPlacesWithSearch(searchTerm);
     } else {
-      // If no search term, filter existing places
       let filteredPlaces = [...allPlaces];
       if (hideChains) {
         filteredPlaces = filteredPlaces.filter((place) => {
@@ -203,10 +196,8 @@ function success(pos) {
       const result = await response.json();
 
       if (response.ok) {
-        // Store all results first
         allPlaces = result.places || [];
 
-        // Then filter if needed
         let displayResults = [...allPlaces];
         if (hideChains) {
           displayResults = displayResults.filter((place) => {
@@ -215,7 +206,6 @@ function success(pos) {
           });
         }
 
-        // Send to backend and display
         await sendCoffeeShopsToBackend(allPlaces);
         displayPlaces(displayResults);
       } else {
@@ -232,7 +222,7 @@ function success(pos) {
   const fetchNearbyPlaces = async () => {
     const url = "https://places.googleapis.com/v1/places:searchNearby";
     const loading = document.getElementById("loading");
-    loading.style.display = "block"; // Show loading indicator
+    loading.style.display = "block";
 
     const body = {
       includedTypes: ["coffee_shop", "cafe"],
@@ -263,10 +253,10 @@ function success(pos) {
 
       if (response.ok) {
         const places = result.places || [];
-        allPlaces = places; // Update allPlaces first
-        displayPlaces(places); // Display immediately
-        await sendCoffeeShopsToBackend(places); // Send to backend after displaying
-        return true; // Indicate success
+        allPlaces = places;
+        displayPlaces(places);
+        await sendCoffeeShopsToBackend(places);
+        return true;
       } else {
         displayError(result.error.message || "Failed to fetch nearby places");
         return false;
@@ -276,20 +266,16 @@ function success(pos) {
       displayError("An error occurred while fetching nearby places.");
       return false;
     } finally {
-      loading.style.display = "none"; // Hide loading indicator
+      loading.style.display = "none";
     }
   };
 
   async function initialize() {
     try {
-      // First initialize the map
       initMap();
-
-      // Then fetch and display places
       const success = await fetchNearbyPlaces();
 
       if (success) {
-        // Only initialize search after we have places
         initializeSearch();
       }
     } catch (error) {
