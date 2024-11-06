@@ -438,6 +438,8 @@ function success(pos) {
       }
     });
 
+    console.log(places);
+
     if (markers.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       markers.forEach((marker) => bounds.extend(marker.getPosition()));

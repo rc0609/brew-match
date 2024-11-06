@@ -39,6 +39,7 @@ const firebaseConfig = {
   appId: "1:871621577528:web:d8af0d672974024d954fcd",
 
   measurementId: "G-Y6YQ6NBFMX",
+  databaseURL: "https://brew-match-default-rtdb.firebaseio.com/",
 };
 
 // Initialize Firebase
