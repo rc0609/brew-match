@@ -118,6 +118,19 @@ body {
   overflow: hidden;
 }
 
+.room-tools,
+.content-container {
+  display: none;
+}
+
+.room-tools.active {
+  display: flex;
+}
+
+.content-container.active {
+  display: flex;
+}
+
 #whiteboard {
   width: 100%;
   height: 100%;

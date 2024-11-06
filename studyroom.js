@@ -49,6 +49,7 @@ const rtdb = getDatabase();
 
 class StudyRoom {
   constructor() {
+    this.currentTool = "pencil";
     this.currentUser = null;
     this.currentRoom = null;
     this.canvas = document.getElementById("whiteboard");
@@ -59,6 +60,8 @@ class StudyRoom {
     this.pathsListener = null;
 
     document.addEventListener("DOMContentLoaded", () => {
+      document.querySelector(".room-tools").classList.remove("active");
+      document.querySelector(".content-container").classList.remove("active");
       this.initializeAuth();
       this.initializeCanvas();
       this.initializeEventListeners();
@@ -147,23 +150,39 @@ class StudyRoom {
     this.ctx.lineWidth = 2;
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
+    this.setCanvasSettings();
   }
 
-  resizeCanvas() {
-    const container = this.canvas.parentElement;
-    const rect = container.getBoundingClientRect();
+  setCanvasSettings() {
+    if (!this.ctx) return;
 
-    this.canvas.width = rect.width;
-    this.canvas.height = rect.height;
-
-    // Preserve drawing settings
     this.ctx.strokeStyle = "#000000";
     this.ctx.lineWidth = 2;
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
   }
 
+  resizeCanvas() {
+    if (!this.canvas) return;
+
+    const container = this.canvas.parentElement;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+
+    // Set canvas size to match container
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+
+    // Reset canvas settings after resize
+    this.setCanvasSettings();
+  }
+
   initializeEventListeners() {
+    const toolSelect = document.getElementById("toolSelect");
+    toolSelect.addEventListener("change", (e) => {
+      this.currentTool = e.target.value;
+    });
     document.querySelectorAll(".room-btn").forEach((button) => {
       button.addEventListener("click", () =>
         this.joinRoom(button.dataset.room)
@@ -243,6 +262,12 @@ class StudyRoom {
 
     this.currentRoom = roomName;
     document.getElementById("roomTitle").textContent = `${roomName} Room`;
+    document.querySelector(".room-tools").classList.add("active");
+    document.querySelector(".content-container").classList.add("active");
+
+    setTimeout(() => {
+      this.resizeCanvas();
+    }, 0);
 
     document.querySelectorAll(".room-btn").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.room === roomName);
@@ -315,8 +340,8 @@ class StudyRoom {
       if (!path.points || path.points.length < 2) return;
 
       this.ctx.beginPath();
-      this.ctx.strokeStyle = path.color || "#000000";
-      this.ctx.lineWidth = path.width || 2;
+      this.ctx.strokeStyle = path.isEraser ? "white" : path.color || "#000000";
+      this.ctx.lineWidth = path.isEraser ? 20 : path.width || 2;
       this.ctx.lineCap = "round";
       this.ctx.lineJoin = "round";
 
@@ -450,16 +475,29 @@ class StudyRoom {
   startDrawing(e) {
     this.isDrawing = true;
     const pos = this.getCanvasPosition(e);
+    this.startX = pos.x;
+    this.startY = pos.y;
+
     this.currentPath = [pos];
     this.ctx.beginPath();
     this.ctx.moveTo(pos.x, pos.y);
+
+    if (this.currentTool === "eraser") {
+      this.ctx.strokeStyle = "white"; // Or your canvas background color
+      this.ctx.lineWidth = 20; // Wider for eraser
+    }
   }
 
   draw(e) {
     if (!this.isDrawing) return;
 
     const pos = this.getCanvasPosition(e);
-    this.currentPath.push({ x: pos.x, y: pos.y });
+    this.currentPath.push(pos);
+
+    if (this.currentTool === "eraser") {
+      this.ctx.strokeStyle = "white"; // Or your canvas background color
+      this.ctx.lineWidth = 20;
+    }
 
     this.ctx.lineTo(pos.x, pos.y);
     this.ctx.stroke();
@@ -474,19 +512,25 @@ class StudyRoom {
     if (this.currentPath.length > 1) {
       try {
         const newPathRef = push(this.pathsRef);
-
         await set(newPathRef, {
           points: this.currentPath,
-          color: this.ctx.strokeStyle,
-          width: this.ctx.lineWidth,
+          color: this.currentTool === "eraser" ? "white" : this.ctx.strokeStyle,
+          width: this.currentTool === "eraser" ? 20 : this.ctx.lineWidth,
           timestamp: rtdbTimestamp(),
           userId: this.currentUser.uid,
+          isEraser: this.currentTool === "eraser",
         });
 
         console.log("Path saved successfully");
       } catch (error) {
         console.error("Error saving path:", error);
       }
+    }
+
+    // Reset to previous settings if was eraser
+    if (this.currentTool === "eraser") {
+      this.ctx.strokeStyle = document.getElementById("colorPicker").value;
+      this.ctx.lineWidth = document.getElementById("brushSize").value;
     }
 
     this.currentPath = [];
