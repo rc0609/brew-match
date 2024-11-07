@@ -36,13 +36,17 @@
           <div class="room-tools">
             <select id="toolSelect">
               <option value="pencil">Pencil</option>
-              <option value="line">Line</option>
-              <option value="rectangle">Rectangle</option>
-              <option value="circle">Circle</option>
               <option value="eraser">Eraser</option>
             </select>
-            <input type="color" id="colorPicker" />
-            <input type="range" id="brushSize" min="1" max="20" value="2" />
+            <input type="color" id="colorPicker" value="#000000" />
+            <input
+              type="range"
+              id="brushSize"
+              min="1"
+              max="50"
+              value="2"
+              title="Brush Size"
+            />
             <button id="clearBoard">Clear Board</button>
             <button id="saveBoard">Save Board</button>
           </div>

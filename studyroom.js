@@ -58,6 +58,8 @@ class StudyRoom {
     this.currentPath = [];
     this.pathsRef = null;
     this.pathsListener = null;
+    this.MAX_BRUSH_SIZE = 50;
+    this.ERASER_SCALE = 2;
 
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelector(".room-tools").classList.remove("active");
@@ -170,11 +172,9 @@ class StudyRoom {
 
     const rect = container.getBoundingClientRect();
 
-    // Set canvas size to match container
     this.canvas.width = rect.width;
     this.canvas.height = rect.height;
 
-    // Reset canvas settings after resize
     this.setCanvasSettings();
   }
 
@@ -195,6 +195,13 @@ class StudyRoom {
     const saveBoard = document.getElementById("saveBoard");
     const messageInput = document.getElementById("messageInput");
     const sendMessage = document.getElementById("sendMessage");
+
+    brushSize.max = this.MAX_BRUSH_SIZE;
+    brushSize.addEventListener("change", (e) => {
+      const size = Math.min(parseInt(e.target.value), this.MAX_BRUSH_SIZE);
+      this.ctx.lineWidth =
+        this.currentTool === "eraser" ? size * this.ERASER_SCALE : size;
+    });
 
     colorPicker.addEventListener(
       "change",
@@ -273,7 +280,6 @@ class StudyRoom {
       btn.classList.toggle("active", btn.dataset.room === roomName);
     });
 
-    // create room in firestore
     const roomRef = doc(db, "rooms", roomName);
     const roomSnapshot = await getDoc(roomRef);
 
@@ -284,7 +290,6 @@ class StudyRoom {
       });
     }
 
-    // Set up room presence
     const roomUserRef = ref(
       rtdb,
       `rooms/${roomName}/users/${this.currentUser.uid}`
@@ -483,8 +488,12 @@ class StudyRoom {
     this.ctx.moveTo(pos.x, pos.y);
 
     if (this.currentTool === "eraser") {
-      this.ctx.strokeStyle = "white"; // Or your canvas background color
-      this.ctx.lineWidth = 20; // Wider for eraser
+      this.ctx.strokeStyle = "white";
+      const baseWidth = Math.min(
+        parseInt(document.getElementById("brushSize").value),
+        this.MAX_BRUSH_SIZE
+      );
+      this.ctx.lineWidth = baseWidth * this.ERASER_SCALE;
     }
   }
 
@@ -495,8 +504,15 @@ class StudyRoom {
     this.currentPath.push(pos);
 
     if (this.currentTool === "eraser") {
-      this.ctx.strokeStyle = "white"; // Or your canvas background color
-      this.ctx.lineWidth = 20;
+      this.ctx.strokeStyle = "white";
+      const baseWidth = Math.min(
+        parseInt(document.getElementById("brushSize").value),
+        this.MAX_BRUSH_SIZE
+      );
+      this.ctx.lineWidth = baseWidth * this.ERASER_SCALE;
+
+      this.ctx.lineCap = "round";
+      this.ctx.lineJoin = "round";
     }
 
     this.ctx.lineTo(pos.x, pos.y);
@@ -511,11 +527,18 @@ class StudyRoom {
 
     if (this.currentPath.length > 1) {
       try {
+        const baseWidth = Math.min(
+          parseInt(document.getElementById("brushSize").value),
+          this.MAX_BRUSH_SIZE
+        );
         const newPathRef = push(this.pathsRef);
         await set(newPathRef, {
           points: this.currentPath,
           color: this.currentTool === "eraser" ? "white" : this.ctx.strokeStyle,
-          width: this.currentTool === "eraser" ? 20 : this.ctx.lineWidth,
+          width:
+            this.currentTool === "eraser"
+              ? baseWidth * this.ERASER_SCALE
+              : baseWidth,
           timestamp: rtdbTimestamp(),
           userId: this.currentUser.uid,
           isEraser: this.currentTool === "eraser",
@@ -527,10 +550,12 @@ class StudyRoom {
       }
     }
 
-    // Reset to previous settings if was eraser
     if (this.currentTool === "eraser") {
       this.ctx.strokeStyle = document.getElementById("colorPicker").value;
-      this.ctx.lineWidth = document.getElementById("brushSize").value;
+      this.ctx.lineWidth = Math.min(
+        parseInt(document.getElementById("brushSize").value),
+        this.MAX_BRUSH_SIZE
+      );
     }
 
     this.currentPath = [];
