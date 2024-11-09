@@ -112,62 +112,12 @@ h1 {
     transform: scale(0.95);
 }
 
-.cafe-contact{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-left: -1250px;
-    margin-top: -10px;
-    margin-bottom: 5px;
-    padding: 15px;
-    width: auto;
-    z-index: 1;
-    
-}
-
-.cafe-contact a{
-    font-size: 13px;
-    background-color: #A3B18A;
-    color: #FFFFFF;
-    border-radius: 10px;
-    padding: 8px;
-    box-shadow: 5px 6px 19px rgba(120, 104, 104, 0.15);
-    margin-bottom: 5px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.cafe-contact a:hover{
-    background-color: #FFFFFF;
-    color: #A3B18A;
-
-}
-
-.cafe-contact a:active {
-    transform: scale(0.99);
-}
-
-
 .cafe-info-container{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 
-}
-
-#cafe-description {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    height: auto;
-    padding: 6px;
-    margin-top: -30px;
-}
-
-#cafe-description p{
-    font-size: 16px;
-    color: #593D3B;
 }
 
 .menu-container{
@@ -329,36 +279,60 @@ h1 {
     transform: scale(0.95);
 }
 
-#leave-review-container{
+#cafe-contact-outer-box {
+    margin-top: 20px;
+    width: auto;
+    height: 140px;
+    background-color: #FFFFFF;
+    margin-left: 80px;
+    border-radius: 30px;
+    box-shadow: 5px 6px 19px rgba(0, 0, 0, 0.15);
     display: flex;
-    justify-content: flex-start;
-    margin-top: 30px;
-    padding-left: 245px;
 }
 
-#leave-review-container button {
+#cafe-contact-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 20px;
+
+}
+
+.cafe-contact{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    width: auto;
+    
+}
+
+.cafe-contact button{
     background-color: transparent;
     color: #344E41;
     border: 1px solid #344E41;
     border-radius: 6px;
-    width: 8.5rem;
+    width: auto;
     height: 2.5rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
+    padding: 7px;
     cursor: pointer;
     text-align: center;
     margin-top: 10px; 
     transition: background-color 0.3s, color 0.3s;
 }
 
-#leave-review-container button:hover {
+.cafe-contact button:hover{
     background-color: #588157;
     color: white;
 }
 
-#leave-review-container button:active {
+.cafe-contact button:active {
     transform: scale(0.99);
 }
+
+
 
 .comment-section {
     display: flex;
