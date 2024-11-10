@@ -101,6 +101,7 @@ h1 {
     font-weight: 600;
     transition: background-color 0.3s, color 0.3s;
     transition: background-color 0.3s, color 0.3s;
+    z-index: 1;
 }
 
 .mid-navigation a:hover{
@@ -118,37 +119,6 @@ h1 {
     justify-content: center;
     align-items: center;
 
-}
-
-.menu-container{
-    display: flex;
-    width: 100%;
-    justify-content: flex-end;
-    padding: 10px;
-    margin-top: -150px;
-    margin-right: 100px;
-}
-
-#menu {
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: 500;
-    background-color: #588157;
-    color: #fff;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    height: 8rem;
-    width: 11rem;
-    transition: background-color 0.3s;
-}
-
-#menu:hover {
-    background-color: #8b9d76;
-}
-
-#menu:active {
-    transform: scale(0.99);
 }
 
 
@@ -174,6 +144,12 @@ h1 {
     padding: 10px;
     display: flex;
     justify-content: space-around;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#rating-outer-box:hover{
+    transform: scale(1.02); 
+    box-shadow: 15px 10px 25px rgba(0, 0, 0, 0.25); 
 }
 
 .rating-container {
@@ -288,6 +264,12 @@ h1 {
     border-radius: 30px;
     box-shadow: 5px 6px 19px rgba(0, 0, 0, 0.15);
     display: flex;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#cafe-contact-outer-box:hover{
+    transform: scale(1.02); 
+    box-shadow: 15px 10px 25px rgba(0, 0, 0, 0.25); 
 }
 
 #cafe-contact-container {
@@ -332,6 +314,39 @@ h1 {
     transform: scale(0.99);
 }
 
+#cafe-contact-left{
+    display: flex;
+    flex-direction: column;
+}
+
+#cafe-contact-right{
+    display: flex;
+    margin-top: -110px;
+    margin-left: 250px;
+}
+
+#menu {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: #588157;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    height: 7rem;
+    width: 10rem;
+    transition: background-color 0.3s;
+}
+
+#menu:hover {
+    background-color: #8b9d76;
+}
+
+#menu:active {
+    transform: scale(0.99);
+}
+
 
 
 .comment-section {
@@ -345,24 +360,50 @@ h1 {
     align-items:flex-start;
     padding: 20px;
     margin-left: -100px;
+    margin-top: -20px;
 }
 
 #box1{
     height: 300px;
-    width: 280px;
+    width: 250px;
     background: #FFFFFF;
-    margin-right: 60px;
+    margin-right: 30px;
     border-radius: 30px;
     box-shadow: 12px 6px 19px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 #box2{
     height: 300px;
-    width: 280px;
+    width: 250px;
     background: #FFFFFF;
-    margin-right: 50px;
+    margin-right: 30px;
     border-radius: 30px;
     box-shadow: 12px 6px 19px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#box3{
+    height: 300px;
+    width: 250px;
+    background: #FFFFFF;
+    border-radius: 30px;
+    box-shadow: 12px 6px 19px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#box1:hover, #box2:hover, #box3:hover{
+    transform: scale(1.02); 
+    box-shadow: 15px 10px 25px rgba(0, 0, 0, 0.25); 
 }
 
 
@@ -372,17 +413,10 @@ h1 {
     justify-content: space-between;
 }
 
-#box1{
+.user-info {
     display: flex;
-    justify-content: center;
-    padding: 20px;
-}
-
-#box2{
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-
+    flex-direction: column;
+    align-items: center;
 }
 
 .user-icon {
@@ -391,4 +425,26 @@ h1 {
     height: 120px;
     width: 120px;
     border: solid 3px #344E41;
+}
+
+.user-name {
+    margin-top: 10px;
+    font-size: 1em;
+    color: #344E41;
+    font-weight: 600;
+    text-align: center;
+}
+
+.quote-icon {
+    align-self: center;
+    margin-left: -12px;
+    margin-top: -240px;
+}
+
+.user-comment {
+    display: flex;
+    font-size:0.8em;
+    color: #593D3B;
+    padding: 10px;
+    text-align: center;
 }
