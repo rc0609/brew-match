@@ -26,6 +26,22 @@ const CHAIN_STORES = [
   "seattle's best coffee",
 ];
 
+let showOpenOnly = false;
+let selectedServices = {
+  dineIn: false,
+  takeout: false,
+  delivery: false,
+};
+let selectedFoodOptions = {
+  breakfast: false,
+  dessert: false,
+};
+let selectedPaymentOptions = {
+  creditCards: false,
+  nfc: false,
+};
+
+let selectedPriceLevel = "all";
 let allPlaces = [];
 let hideChains = false;
 let minimumRating = 0;
@@ -151,31 +167,120 @@ function success(pos) {
     const filterMain = document.getElementById("filter-main");
     const filterChains = document.getElementById("filter-chains");
     const filterRating = document.getElementById("filter-rating");
+    const filterPrice = document.getElementById("filter-price");
+    const filterOpen = document.getElementById("filter-open");
     const dropdown = filterMain.parentElement;
 
-    // Toggle dropdown
     filterMain.addEventListener("click", () => {
       dropdown.classList.toggle("active");
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
       if (!dropdown.contains(e.target)) {
         dropdown.classList.remove("active");
       }
     });
 
-    // Handle chain filter
+    filterPrice.addEventListener("change", (e) => {
+      selectedPriceLevel = e.target.value;
+      filterAndDisplayPlaces();
+    });
+
+    filterOpen.addEventListener("change", (e) => {
+      showOpenOnly = e.target.checked;
+      filterAndDisplayPlaces();
+    });
+
     filterChains.addEventListener("change", (e) => {
       hideChains = e.target.checked;
       filterAndDisplayPlaces();
     });
 
-    // Handle rating filter
     filterRating.addEventListener("change", (e) => {
       minimumRating = parseFloat(e.target.value);
       filterAndDisplayPlaces();
     });
+
+    document
+      .getElementById("filter-dine-in")
+      .addEventListener("change", (e) => {
+        selectedServices.dineIn = e.target.checked;
+        filterAndDisplayPlaces();
+      });
+    document
+      .getElementById("filter-takeout")
+      .addEventListener("change", (e) => {
+        selectedServices.takeout = e.target.checked;
+        filterAndDisplayPlaces();
+      });
+    document
+      .getElementById("filter-delivery")
+      .addEventListener("change", (e) => {
+        selectedServices.delivery = e.target.checked;
+        filterAndDisplayPlaces();
+      });
+
+    document
+      .getElementById("filter-breakfast")
+      .addEventListener("change", (e) => {
+        selectedFoodOptions.breakfast = e.target.checked;
+        filterAndDisplayPlaces();
+      });
+    document
+      .getElementById("filter-dessert")
+      .addEventListener("change", (e) => {
+        selectedFoodOptions.dessert = e.target.checked;
+        filterAndDisplayPlaces();
+      });
+
+    document
+      .getElementById("filter-credit-cards")
+      .addEventListener("change", (e) => {
+        selectedPaymentOptions.creditCards = e.target.checked;
+        filterAndDisplayPlaces();
+      });
+    document.getElementById("filter-nfc").addEventListener("change", (e) => {
+      selectedPaymentOptions.nfc = e.target.checked;
+      filterAndDisplayPlaces();
+    });
+
+    document
+      .getElementById("clear-filters")
+      .addEventListener("click", clearAllFilters);
+  }
+
+  function clearAllFilters() {
+    hideChains = false;
+    minimumRating = 0;
+    selectedPriceLevel = "all";
+    showOpenOnly = false;
+    selectedServices = {
+      dineIn: false,
+      takeout: false,
+      delivery: false,
+    };
+    selectedFoodOptions = {
+      breakfast: false,
+      dessert: false,
+    };
+    selectedPaymentOptions = {
+      creditCards: false,
+      nfc: false,
+    };
+
+    document.getElementById("filter-chains").checked = false;
+    document.getElementById("filter-rating").value = "0";
+    document.getElementById("filter-price").value = "all";
+    document.getElementById("filter-open").checked = false;
+    document.getElementById("filter-dine-in").checked = false;
+    document.getElementById("filter-takeout").checked = false;
+    document.getElementById("filter-delivery").checked = false;
+    document.getElementById("filter-breakfast").checked = false;
+    document.getElementById("filter-dessert").checked = false;
+    document.getElementById("filter-credit-cards").checked = false;
+    document.getElementById("filter-nfc").checked = false;
+
+    filterAndDisplayPlaces();
   }
 
   function filterAndDisplayPlaces() {
@@ -198,6 +303,53 @@ function success(pos) {
           (place) => (place.rating || 0) >= minimumRating
         );
       }
+
+      if (selectedPriceLevel !== "all") {
+        filteredPlaces = filteredPlaces.filter(
+          (place) => place.priceLevel === selectedPriceLevel
+        );
+      }
+
+      if (showOpenOnly) {
+        filteredPlaces = filteredPlaces.filter(
+          (place) => place.currentOpeningHours?.openNow
+        );
+      }
+
+      if (selectedServices.dineIn) {
+        filteredPlaces = filteredPlaces.filter((place) => place.dineIn);
+      }
+
+      if (selectedServices.takeout) {
+        filteredPlaces = filteredPlaces.filter((place) => place.takeout);
+      }
+
+      if (selectedServices.delivery) {
+        filteredPlaces = filteredPlaces.filter((place) => place.delivery);
+      }
+
+      if (selectedFoodOptions.breakfast) {
+        filteredPlaces = filteredPlaces.filter(
+          (place) => place.servesBreakfast
+        );
+      }
+
+      if (selectedFoodOptions.dessert) {
+        filteredPlaces = filteredPlaces.filter((place) => place.servesDessert);
+      }
+
+      if (selectedPaymentOptions.creditCards) {
+        filteredPlaces = filteredPlaces.filter(
+          (place) => place.paymentOptions?.acceptsCreditCards
+        );
+      }
+
+      if (selectedPaymentOptions.nfc) {
+        filteredPlaces = filteredPlaces.filter(
+          (place) => place.paymentOptions?.acceptsNfc
+        );
+      }
+
       displayPlaces(filteredPlaces);
     }
   }

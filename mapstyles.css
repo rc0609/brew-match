@@ -29,6 +29,7 @@ body {
   display: none;
 }
 
+/* Search Container Styles */
 .search-container {
   position: sticky;
   top: 0;
@@ -85,6 +86,7 @@ body {
   pointer-events: none;
 }
 
+/* Filter Styles */
 .filter-buttons {
   margin-top: 10px;
 }
@@ -110,16 +112,123 @@ body {
   color: #fff;
 }
 
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  min-width: 200px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1000;
+  margin-top: 5px;
+}
+
+.dropdown.active .dropdown-content {
+  display: block;
+}
+
+.filter-option {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-option:last-child {
+  border-bottom: none;
+}
+
+.filter-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4285f4;
+  margin: 8px 0 4px 0;
+}
+
+.filter-dropdown {
+  width: 100%;
+  padding: 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  background-color: #f8f9fa;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-dropdown:hover {
+  border-color: #d1d5db;
+  background-color: #fff;
+}
+
+.filter-dropdown:focus {
+  outline: none;
+  border-color: #4285f4;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.filter-option label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.clear-filters-btn {
+  width: 100%;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  color: #666;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+}
+
+.clear-filters-btn:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.arrow {
+  display: inline-block;
+  margin-left: 5px;
+  transition: transform 0.3s ease;
+}
+
+.dropdown.active .arrow {
+  transform: rotate(180deg);
+}
+
+/* Map and Places List Styles */
 #map {
   flex: 1;
   height: 80vh;
   border-radius: 8px;
-}
-
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 20px;
 }
 
 .error {
@@ -183,51 +292,7 @@ h1 {
   font-size: 0.9em;
 }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #fff;
-  min-width: 200px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 10px;
-  z-index: 1000;
-  margin-top: 5px;
-}
-
-.dropdown.active .dropdown-content {
-  display: block;
-}
-
-.filter-option {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.filter-option:last-child {
-  border-bottom: none;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-#filter-rating {
-  width: 100%;
-  padding: 6px;
-  margin-top: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
+/* Responsive Styles */
 @media (max-width: 768px) {
   .container {
     flex-direction: column;

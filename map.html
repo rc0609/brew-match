@@ -32,14 +32,80 @@
                     Stores
                   </label>
                 </div>
+
                 <div class="filter-option">
-                  <label>Minimum Rating:</label>
-                  <select id="filter-rating">
+                  <label>Minimum Rating</label>
+                  <select id="filter-rating" class="filter-dropdown">
                     <option value="0">All Ratings</option>
                     <option value="3">3+ Stars</option>
                     <option value="4">4+ Stars</option>
                     <option value="4.5">4.5+ Stars</option>
                   </select>
+                </div>
+
+                <div class="filter-option">
+                  <label>Price Range</label>
+                  <select id="filter-price" class="filter-dropdown">
+                    <option value="all">All Prices</option>
+                    <option value="PRICE_LEVEL_INEXPENSIVE">
+                      $ (Inexpensive)
+                    </option>
+                    <option value="PRICE_LEVEL_MODERATE">$$ (Moderate)</option>
+                    <option value="PRICE_LEVEL_EXPENSIVE">
+                      $$$ (Expensive)
+                    </option>
+                    <option value="PRICE_LEVEL_VERY_EXPENSIVE">
+                      $$$$ (Very Expensive)
+                    </option>
+                  </select>
+                </div>
+
+                <div class="filter-option">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-open" /> Open Now
+                  </label>
+                </div>
+
+                <div class="filter-option">
+                  <h4 class="filter-section-title">Services</h4>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-dine-in" /> Dine-in
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-takeout" /> Takeout
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-delivery" /> Delivery
+                  </label>
+                </div>
+
+                <div class="filter-option">
+                  <h4 class="filter-section-title">Food & Drinks</h4>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-breakfast" /> Serves
+                    Breakfast
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-dessert" /> Serves Dessert
+                  </label>
+                </div>
+
+                <div class="filter-option">
+                  <h4 class="filter-section-title">Payment Options</h4>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-credit-cards" /> Accepts
+                    Credit Cards
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-nfc" /> Accepts NFC
+                    Payments
+                  </label>
+                </div>
+
+                <div class="filter-option">
+                  <button id="clear-filters" class="clear-filters-btn">
+                    Clear All Filters
+                  </button>
                 </div>
               </div>
             </div>
