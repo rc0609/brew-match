@@ -183,6 +183,51 @@ h1 {
   font-size: 0.9em;
 }
 
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  min-width: 200px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1000;
+  margin-top: 5px;
+}
+
+.dropdown.active .dropdown-content {
+  display: block;
+}
+
+.filter-option {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-option:last-child {
+  border-bottom: none;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+#filter-rating {
+  width: 100%;
+  padding: 6px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: column;

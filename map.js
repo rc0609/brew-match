@@ -28,6 +28,7 @@ const CHAIN_STORES = [
 
 let allPlaces = [];
 let hideChains = false;
+let minimumRating = 0;
 
 window.onbeforeunload = function (e) {
   const searchInput = document.getElementById("search-input");
@@ -146,6 +147,37 @@ function success(pos) {
     });
   }
 
+  function initializeFilters() {
+    const filterMain = document.getElementById("filter-main");
+    const filterChains = document.getElementById("filter-chains");
+    const filterRating = document.getElementById("filter-rating");
+    const dropdown = filterMain.parentElement;
+
+    // Toggle dropdown
+    filterMain.addEventListener("click", () => {
+      dropdown.classList.toggle("active");
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove("active");
+      }
+    });
+
+    // Handle chain filter
+    filterChains.addEventListener("change", (e) => {
+      hideChains = e.target.checked;
+      filterAndDisplayPlaces();
+    });
+
+    // Handle rating filter
+    filterRating.addEventListener("change", (e) => {
+      minimumRating = parseFloat(e.target.value);
+      filterAndDisplayPlaces();
+    });
+  }
+
   function filterAndDisplayPlaces() {
     const searchInput = document.getElementById("search-input");
     const searchTerm = searchInput.value.toLowerCase().trim();
@@ -159,6 +191,12 @@ function success(pos) {
           const placeName = place.displayName.text.toLowerCase();
           return !CHAIN_STORES.some((chain) => placeName.includes(chain));
         });
+      }
+
+      if (minimumRating > 0) {
+        filteredPlaces = filteredPlaces.filter(
+          (place) => (place.rating || 0) >= minimumRating
+        );
       }
       displayPlaces(filteredPlaces);
     }
@@ -204,6 +242,12 @@ function success(pos) {
             const placeName = place.displayName.text.toLowerCase();
             return !CHAIN_STORES.some((chain) => placeName.includes(chain));
           });
+        }
+
+        if (minimumRating > 0) {
+          displayResults = displayResults.filter(
+            (place) => (place.rating || 0) >= minimumRating
+          );
         }
 
         await sendCoffeeShopsToBackend(allPlaces);
@@ -277,6 +321,7 @@ function success(pos) {
 
       if (success) {
         initializeSearch();
+        initializeFilters();
       }
     } catch (error) {
       console.error("Initialization error:", error);

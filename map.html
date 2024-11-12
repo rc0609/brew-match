@@ -21,9 +21,28 @@
             />
           </div>
           <div class="filter-buttons">
-            <button id="filter-chains" class="filter-btn" type="button">
-              Hide Chain Stores
-            </button>
+            <div class="dropdown">
+              <button id="filter-main" class="filter-btn" type="button">
+                Filters <span class="arrow">▼</span>
+              </button>
+              <div class="dropdown-content">
+                <div class="filter-option">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="filter-chains" /> Hide Chain
+                    Stores
+                  </label>
+                </div>
+                <div class="filter-option">
+                  <label>Minimum Rating:</label>
+                  <select id="filter-rating">
+                    <option value="0">All Ratings</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="4.5">4.5+ Stars</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="error"></div>
