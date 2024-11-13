@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coffee Shop Preference Quiz | Brew Match</title>
+    <link rel="stylesheet" href="quizstyles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="quiz-header">
+        <h1>Find Your Perfect Coffee Shop</h1>
+        <p>Take this quick quiz to help us understand your preferences</p>
+      </div>
+
+      <div id="quiz-container" class="hidden">
+        <div class="progress-container">
+          <div id="progress-bar">1/5</div>
+        </div>
+        <div id="question-container"></div>
+      </div>
+
+      <div id="recommendations-container" class="hidden">
+        <h2>Recommended Coffee Shops</h2>
+        <div id="recommendations-list"></div>
+      </div>
+
+      <div id="error-message" class="hidden"></div>
+
+      <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Finding coffee shops near you...</div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"
+    ></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"
+    ></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js"
+    ></script>
+    <script
+      type="module"
+      src="https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js"
+    ></script>
+
+    <script type="module" src="quiz.js"></script>
+  </body>
+</html>
