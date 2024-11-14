@@ -713,12 +713,11 @@ function success(pos) {
         listItem.appendChild(ratingElement);
       }
 
-      // Add View Details button
       const detailsButton = document.createElement("button");
       detailsButton.classList.add("view-details-btn");
       detailsButton.textContent = "View Details";
       detailsButton.onclick = (e) => {
-        e.stopPropagation(); // Prevent triggering the list item click
+        e.stopPropagation();
         navigateToCafePage(place);
       };
       listItem.appendChild(detailsButton);
@@ -799,7 +798,6 @@ function success(pos) {
   };
 
   function navigateToCafePage(place) {
-    // Encode the place data to safely pass in URL
     const placeData = {
       id: place.id,
       name: place.displayName.text,
@@ -813,10 +811,8 @@ function success(pos) {
       location: place.location,
     };
 
-    // Encode the data to pass safely in URL
     const encodedData = encodeURIComponent(JSON.stringify(placeData));
 
-    // Navigate to cafe page with data
     window.location.href = `cafe.html?placeData=${encodedData}`;
   }
 

@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Get place data from URL
   const urlParams = new URLSearchParams(window.location.search);
   const placeDataStr = urlParams.get("placeData");
 
@@ -7,16 +6,13 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const place = JSON.parse(decodeURIComponent(placeDataStr));
 
-      // Update page elements with place data
       document.querySelector("h1").textContent = place.name;
 
-      // Update rating
       const ratingContainer = document.querySelector(".rating-container");
       if (ratingContainer) {
         ratingContainer.textContent = place.rating || "N/A";
       }
 
-      // Update contact information
       const contactLeft = document.querySelector("#cafe-contact-left");
       if (contactLeft) {
         contactLeft.innerHTML = `
@@ -25,7 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
           `;
       }
 
-      // Update website link
       const contactRight = document.querySelector("#cafe-contact-right");
       if (contactRight && place.website) {
         contactRight.innerHTML = `
@@ -35,22 +30,16 @@ document.addEventListener("DOMContentLoaded", function () {
           `;
       }
 
-      // Update rating bars if the data is available
       if (place.totalRatings) {
-        // You would need to implement the logic to calculate the distribution
-        // of ratings, as the Places API doesn't provide this breakdown
         updateRatingBars(place.rating, place.totalRatings);
       }
     } catch (error) {
       console.error("Error parsing place data:", error);
-      // Handle error appropriately
     }
   }
 });
 
 function updateRatingBars(rating, totalRatings) {
-  // This is a simplified example - you might want to adjust the logic
-  // based on your actual rating distribution data
   const bars = {
     "bar-5": 0.4,
     "bar-4": 0.3,
@@ -66,7 +55,6 @@ function updateRatingBars(rating, totalRatings) {
     }
   });
 
-  // Update review count
   const reviewCount = document.getElementById("review-count");
   if (reviewCount) {
     reviewCount.textContent = `${totalRatings} reviews`;
