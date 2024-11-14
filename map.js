@@ -45,6 +45,7 @@ let selectedPriceLevel = "all";
 let allPlaces = [];
 let hideChains = false;
 let minimumRating = 0;
+let infoWindow;
 
 window.onbeforeunload = function (e) {
   const searchInput = document.getElementById("search-input");
@@ -80,7 +81,6 @@ function success(pos) {
 
   let map;
   let markers = [];
-  let infoWindow;
 
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
@@ -538,6 +538,144 @@ function success(pos) {
     }
   };
 
+  async function fetchStorePopularTimes(placeId, infoWindow, marker, place) {
+    try {
+      const response = await fetch(
+        `https://api.app.outscraper.com/maps/search-v3?query=${encodeURIComponent(
+          placeId
+        )}&limit=1&async=false`,
+        {
+          headers: {
+            "X-API-KEY":
+              "NmQ1NjA3NjE2Yjc1NDFjYWIwMzg4N2IzNzhhMDMwNTl8YjQzNzI5YjY1MA",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("API Response for", place.displayName.text + ":", data);
+
+      // Also log specific data we're using
+      console.log("Store Data:", data?.data?.[0]?.[0]);
+      console.log("Popular Times:", data?.data?.[0]?.[0]?.popular_times);
+
+      if (data?.data?.[0]?.[0]) {
+        const storeData = data.data[0][0];
+
+        // Get current day and hour
+        const now = new Date();
+        const currentDay = now.getDay();
+        const currentHour = now.getHours();
+
+        // Find current day's popular times
+        const todayPopularTimes = storeData.popular_times?.find(
+          (day) => day.day === currentDay
+        );
+        const currentHourData = todayPopularTimes?.popular_times?.find(
+          (time) => time.hour === currentHour
+        );
+
+        // Get fill class based on percentage
+        const getGaugeFillClass = (percentage) => {
+          if (percentage <= 25) return "gauge-fill-low";
+          if (percentage <= 50) return "gauge-fill-medium";
+          if (percentage <= 75) return "gauge-fill-high";
+          return "gauge-fill-very-high";
+        };
+
+        const createPopularityGauge = (percentage, title) => `
+          <div class="popularity-gauge">
+            <div class="gauge-bar">
+              <div class="gauge-fill ${getGaugeFillClass(
+                percentage
+              )}" style="width: ${percentage}%"></div>
+            </div>
+            <span class="gauge-percentage">${percentage}%</span>
+          </div>
+          <div class="gauge-title">${title}</div>
+        `;
+
+        // Get next few hours
+        const currentTimeIndex =
+          todayPopularTimes?.popular_times?.findIndex(
+            (time) => time.hour === currentHour
+          ) || 0;
+        const nextHours =
+          todayPopularTimes?.popular_times?.slice(
+            currentTimeIndex,
+            currentTimeIndex + 4
+          ) || [];
+
+        const contentString = `
+          <div class="info-window-container">
+            <div class="info-window-title">${place.displayName.text}</div>
+            <div class="info-window-address">${place.formattedAddress}</div>
+            
+            <div class="popularity-section">
+              <div class="popularity-header">Current Popularity:</div>
+              ${
+                currentHourData
+                  ? createPopularityGauge(
+                      currentHourData.percentage,
+                      currentHourData.title
+                    )
+                  : "No current data available"
+              }
+            </div>
+  
+            ${
+              nextHours.length > 0
+                ? `
+              <div class="upcoming-hours">
+                <div class="popularity-header">Upcoming Hours:</div>
+                ${nextHours
+                  .map(
+                    (hour) => `
+                  <div class="hour-slot">
+                    <div class="hour-label">${hour.hour}:00</div>
+                    ${createPopularityGauge(hour.percentage, hour.title)}
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            `
+                : ""
+            }
+  
+            ${
+              place.currentOpeningHours
+                ? `
+              <div class="working-hours">
+                <strong>Hours:</strong> ${
+                  place.currentOpeningHours.weekdayDescriptions[now.getDay()]
+                }
+              </div>
+            `
+                : ""
+            }
+          </div>
+        `;
+
+        infoWindow.setContent(contentString);
+      } else {
+        infoWindow.setContent(`
+          <div class="info-window-container">
+            <div class="info-window-title">Error loading store information</div>
+          </div>
+        `);
+      }
+    } catch (error) {
+      console.error("Error fetching store data:", error);
+      infoWindow.setContent(`
+        <div class="info-window-container">
+          <div class="info-window-title">Error loading store information</div>
+        </div>
+      `);
+    }
+  }
+
   const displayPlaces = (places) => {
     const placesList = document.getElementById("places-list");
     const loading = document.getElementById("loading");
@@ -620,17 +758,19 @@ function success(pos) {
         markers.push(marker);
 
         marker.addListener("click", () => {
-          const contentString = `
-            <div>
-              <strong>${
-                place.displayName.text || "Unnamed Coffee Shop"
-              }</strong><br>
-              ${place.formattedAddress || "Address not available"}<br>
-              ${place.rating ? `Rating: ${getEmojiRating(place.rating)}` : ""}
+          // Initial content while loading
+          const initialContent = `
+            <div class="loading-container">
+              <div class="loading-text">Loading store information...</div>
+              <div class="loading-spinner"></div>
             </div>
           `;
-          infoWindow.setContent(contentString);
+
+          infoWindow.setContent(initialContent);
           infoWindow.open(map, marker);
+
+          // Fetch the popularity data
+          fetchStorePopularTimes(place.id, infoWindow, marker, place);
         });
       }
     });
