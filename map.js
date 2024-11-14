@@ -556,19 +556,16 @@ function success(pos) {
 
       console.log("API Response for", place.displayName.text + ":", data);
 
-      // Also log specific data we're using
       console.log("Store Data:", data?.data?.[0]?.[0]);
       console.log("Popular Times:", data?.data?.[0]?.[0]?.popular_times);
 
       if (data?.data?.[0]?.[0]) {
         const storeData = data.data[0][0];
 
-        // Get current day and hour
         const now = new Date();
         const currentDay = now.getDay();
         const currentHour = now.getHours();
 
-        // Find current day's popular times
         const todayPopularTimes = storeData.popular_times?.find(
           (day) => day.day === currentDay
         );
@@ -576,7 +573,6 @@ function success(pos) {
           (time) => time.hour === currentHour
         );
 
-        // Get fill class based on percentage
         const getGaugeFillClass = (percentage) => {
           if (percentage <= 25) return "gauge-fill-low";
           if (percentage <= 50) return "gauge-fill-medium";
@@ -596,7 +592,6 @@ function success(pos) {
           <div class="gauge-title">${title}</div>
         `;
 
-        // Get next few hours
         const currentTimeIndex =
           todayPopularTimes?.popular_times?.findIndex(
             (time) => time.hour === currentHour
@@ -718,6 +713,16 @@ function success(pos) {
         listItem.appendChild(ratingElement);
       }
 
+      // Add View Details button
+      const detailsButton = document.createElement("button");
+      detailsButton.classList.add("view-details-btn");
+      detailsButton.textContent = "View Details";
+      detailsButton.onclick = (e) => {
+        e.stopPropagation(); // Prevent triggering the list item click
+        navigateToCafePage(place);
+      };
+      listItem.appendChild(detailsButton);
+
       listItem.addEventListener("click", () => {
         if (place.location) {
           const position = {
@@ -758,7 +763,6 @@ function success(pos) {
         markers.push(marker);
 
         marker.addListener("click", () => {
-          // Initial content while loading
           const initialContent = `
             <div class="loading-container">
               <div class="loading-text">Loading store information...</div>
@@ -769,7 +773,6 @@ function success(pos) {
           infoWindow.setContent(initialContent);
           infoWindow.open(map, marker);
 
-          // Fetch the popularity data
           fetchStorePopularTimes(place.id, infoWindow, marker, place);
         });
       }
@@ -794,6 +797,28 @@ function success(pos) {
       }
     }
   };
+
+  function navigateToCafePage(place) {
+    // Encode the place data to safely pass in URL
+    const placeData = {
+      id: place.id,
+      name: place.displayName.text,
+      address: place.formattedAddress,
+      rating: place.rating,
+      totalRatings: place.userRatingCount,
+      priceLevel: place.priceLevel,
+      phoneNumber: place.internationalPhoneNumber,
+      website: place.websiteUri,
+      currentOpeningHours: place.currentOpeningHours,
+      location: place.location,
+    };
+
+    // Encode the data to pass safely in URL
+    const encodedData = encodeURIComponent(JSON.stringify(placeData));
+
+    // Navigate to cafe page with data
+    window.location.href = `cafe.html?placeData=${encodedData}`;
+  }
 
   const displayError = (message) => {
     const errorDiv = document.getElementById("error");

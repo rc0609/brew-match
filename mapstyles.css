@@ -423,6 +423,26 @@ body {
   animation: spin 1s linear infinite;
 }
 
+.view-details-btn {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin-top: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.view-details-btn:hover {
+  background-color: #3367d6;
+}
+
+.view-details-btn:active {
+  transform: scale(0.98);
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
