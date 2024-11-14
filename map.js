@@ -798,22 +798,50 @@ function success(pos) {
   };
 
   function navigateToCafePage(place) {
-    const placeData = {
-      id: place.id,
-      name: place.displayName.text,
-      address: place.formattedAddress,
-      rating: place.rating,
-      totalRatings: place.userRatingCount,
-      priceLevel: place.priceLevel,
-      phoneNumber: place.internationalPhoneNumber,
-      website: place.websiteUri,
-      currentOpeningHours: place.currentOpeningHours,
-      location: place.location,
+    const fetchReviews = async () => {
+      const url = `https://places.googleapis.com/v1/places/${place.id}?fields=id,reviews`;
+      try {
+        const response = await fetch(url, {
+          headers: {
+            "X-Goog-Api-Key": apiKey,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+        return data.reviews || [];
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        return [];
+      }
     };
 
-    const encodedData = encodeURIComponent(JSON.stringify(placeData));
+    fetchReviews().then((reviews) => {
+      const placeData = {
+        id: place.id,
+        name: place.displayName.text,
+        address: place.formattedAddress,
+        rating: place.rating,
+        totalRatings: place.userRatingCount,
+        priceLevel: place.priceLevel,
+        phoneNumber: place.internationalPhoneNumber,
+        website: place.websiteUri,
+        currentOpeningHours: place.currentOpeningHours,
+        location: place.location,
+        reviews: reviews
+          .map((review) => ({
+            author: review.authorAttribution?.displayName || "Anonymous",
+            rating: review.rating,
+            text: review.text?.text || "",
+            time: review.relativePublishTimeDescription || "",
+            profilePhoto: review.authorAttribution?.photoUri || null,
+          }))
+          .slice(0, 3),
+      };
 
-    window.location.href = `cafe.html?placeData=${encodedData}`;
+      sessionStorage.setItem("cafeData", JSON.stringify(placeData));
+      window.location.href = "cafe.html";
+    });
   }
 
   const displayError = (message) => {

@@ -1,10 +1,11 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const urlParams = new URLSearchParams(window.location.search);
-  const placeDataStr = urlParams.get("placeData");
+  const placeDataStr = sessionStorage.getItem("cafeData");
 
   if (placeDataStr) {
     try {
-      const place = JSON.parse(decodeURIComponent(placeDataStr));
+      const place = JSON.parse(placeDataStr);
+
+      sessionStorage.removeItem("cafeData");
 
       document.querySelector("h1").textContent = place.name;
 
@@ -33,9 +34,16 @@ document.addEventListener("DOMContentLoaded", function () {
       if (place.totalRatings) {
         updateRatingBars(place.rating, place.totalRatings);
       }
+
+      if (place.reviews && place.reviews.length > 0) {
+        updateReviews(place.reviews);
+      }
     } catch (error) {
       console.error("Error parsing place data:", error);
+      window.location.href = "index.html";
     }
+  } else {
+    window.location.href = "index.html";
   }
 });
 
@@ -59,4 +67,34 @@ function updateRatingBars(rating, totalRatings) {
   if (reviewCount) {
     reviewCount.textContent = `${totalRatings} reviews`;
   }
+}
+
+function updateReviews(reviews) {
+  reviews.forEach((review, index) => {
+    const boxId = `box${index + 1}`;
+    const box = document.getElementById(boxId);
+
+    if (box) {
+      const userInfo = box.querySelector(".user-info");
+      if (userInfo) {
+        let userIconHtml = "";
+        if (review.profilePhoto) {
+          userIconHtml = `<img src="${review.profilePhoto}" alt="${review.author}" class="user-icon">`;
+        } else {
+          const initials = review.author.charAt(0).toUpperCase();
+          userIconHtml = `
+              <div class="user-icon default-icon">
+                <span class="user-initials">${initials}</span>
+              </div>
+            `;
+        }
+
+        userInfo.innerHTML = `
+            ${userIconHtml}
+            <div class="user-name">${review.author}</div>
+            <div class="user-comment">${review.text}</div>
+          `;
+      }
+    }
+  });
 }

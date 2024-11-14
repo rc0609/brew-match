@@ -407,11 +407,30 @@ h1 {
 }
 
 .user-icon {
-  border-radius: 50%;
-  background: #dad7cd;
-  height: 120px;
   width: 120px;
+  height: 120px;
+  border-radius: 50%;
   border: solid 3px #344e41;
+  overflow: hidden;
+}
+
+.user-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.default-icon {
+  background: #dad7cd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-initials {
+  font-size: 48px;
+  color: #344e41;
+  font-weight: bold;
 }
 
 .user-name {
@@ -420,6 +439,9 @@ h1 {
   color: #344e41;
   font-weight: 600;
   text-align: center;
+  word-break: break-word;
+  max-width: 200px;
+  padding: 0 10px;
 }
 
 .quote-icon {
@@ -429,9 +451,11 @@ h1 {
 }
 
 .user-comment {
-  display: flex;
-  font-size: 0.8em;
+  margin-top: 15px;
+  font-size: 0.9em;
   color: #593d3b;
-  padding: 10px;
   text-align: center;
+  max-height: 100px;
+  overflow-y: auto;
+  padding: 0 10px;
 }
