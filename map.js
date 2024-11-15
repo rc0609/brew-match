@@ -165,11 +165,16 @@ function success(pos) {
 
   function initializeFilters() {
     const filterMain = document.getElementById("filter-main");
+    const filterOpen = document.getElementById("filter-open");
     const filterChains = document.getElementById("filter-chains");
     const filterRating = document.getElementById("filter-rating");
     const filterPrice = document.getElementById("filter-price");
-    const filterOpen = document.getElementById("filter-open");
     const dropdown = filterMain.parentElement;
+
+    filterOpen.checked = showOpenOnly;
+    filterChains.checked = hideChains;
+    filterRating.value = minimumRating.toString();
+    filterPrice.value = selectedPriceLevel;
 
     filterMain.addEventListener("click", () => {
       dropdown.classList.toggle("active");
@@ -311,9 +316,14 @@ function success(pos) {
       }
 
       if (showOpenOnly) {
-        filteredPlaces = filteredPlaces.filter(
-          (place) => place.currentOpeningHours?.openNow
-        );
+        console.log("Filtering by open status");
+        filteredPlaces = filteredPlaces.filter((place) => {
+          console.log(
+            `${place.displayName.text} open status:`,
+            place.currentOpeningHours?.openNow
+          );
+          return place.currentOpeningHours?.openNow === true;
+        });
       }
 
       if (selectedServices.dineIn) {
@@ -555,24 +565,23 @@ function success(pos) {
       const data = await response.json();
 
       console.log("API Response for", place.displayName.text + ":", data);
-
       console.log("Store Data:", data?.data?.[0]?.[0]);
       console.log("Popular Times:", data?.data?.[0]?.[0]?.popular_times);
 
-      if (data?.data?.[0]?.[0]) {
-        const storeData = data.data[0][0];
+      const storeData = data?.data?.[0]?.[0];
 
+      if (storeData) {
         const now = new Date();
         const currentDay = now.getDay();
         const currentHour = now.getHours();
 
+        const isOpen = place.currentOpeningHours?.openNow;
         const todayPopularTimes = storeData.popular_times?.find(
           (day) => day.day === currentDay
         );
         const currentHourData = todayPopularTimes?.popular_times?.find(
           (time) => time.hour === currentHour
         );
-
         const getGaugeFillClass = (percentage) => {
           if (percentage <= 25) return "gauge-fill-low";
           if (percentage <= 50) return "gauge-fill-medium";
@@ -592,6 +601,15 @@ function success(pos) {
           <div class="gauge-title">${title}</div>
         `;
 
+        const createClosedStoreGauge = () => `
+          <div class="popularity-gauge">
+            <div class="gauge-bar">
+              <div class="gauge-fill gauge-fill-closed" style="width: 100%"></div>
+            </div>
+            <span class="gauge-status">CLOSED</span>
+          </div>
+        `;
+
         const currentTimeIndex =
           todayPopularTimes?.popular_times?.findIndex(
             (time) => time.hour === currentHour
@@ -601,26 +619,27 @@ function success(pos) {
             currentTimeIndex,
             currentTimeIndex + 4
           ) || [];
-
         const contentString = `
           <div class="info-window-container">
             <div class="info-window-title">${place.displayName.text}</div>
             <div class="info-window-address">${place.formattedAddress}</div>
             
             <div class="popularity-section">
-              <div class="popularity-header">Current Popularity:</div>
+              <div class="popularity-header">Current Status:</div>
               ${
-                currentHourData
-                  ? createPopularityGauge(
-                      currentHourData.percentage,
-                      currentHourData.title
-                    )
-                  : "No current data available"
+                isOpen
+                  ? currentHourData
+                    ? createPopularityGauge(
+                        currentHourData.percentage,
+                        currentHourData.title
+                      )
+                    : "<div class='no-data'>No current data available</div>"
+                  : createClosedStoreGauge()
               }
             </div>
   
             ${
-              nextHours.length > 0
+              isOpen && nextHours.length > 0
                 ? `
               <div class="upcoming-hours">
                 <div class="popularity-header">Upcoming Hours:</div>

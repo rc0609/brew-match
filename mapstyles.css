@@ -383,6 +383,25 @@ body {
   margin-top: 2px;
 }
 
+.gauge-fill-closed {
+  background-color: #dc2626;
+}
+
+.gauge-status {
+  font-size: 12px;
+  min-width: 36px;
+  text-align: right;
+  color: #dc2626;
+  font-weight: bold;
+}
+
+.no-data {
+  color: #666;
+  font-size: 14px;
+  font-style: italic;
+  margin: 8px 0;
+}
+
 .upcoming-hours {
   margin-top: 16px;
 }
