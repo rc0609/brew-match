@@ -11,24 +11,44 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const ratingContainer = document.querySelector(".rating-container");
       if (ratingContainer) {
-        ratingContainer.textContent = place.rating || "N/A";
-      }
-
-      const contactLeft = document.querySelector("#cafe-contact-left");
-      if (contactLeft) {
-        contactLeft.innerHTML = `
-            ${place.phoneNumber || "Phone not available"}<br>
-            ${place.address || "Address not available"}
+        ratingContainer.innerHTML = `
+            <p id="rating">${place.rating || "N/A"}</p>
+            <i class="fas fa-star"></i>
           `;
       }
 
-      const contactRight = document.querySelector("#cafe-contact-right");
-      if (contactRight && place.website) {
-        contactRight.innerHTML = `
-            <a href="${place.website}" target="_blank" rel="noopener noreferrer">
-              Click here to<br>check the website
-            </a>
-          `;
+      const cafeContactContainer = document.querySelector(
+        "#cafe-contact-container"
+      );
+      if (cafeContactContainer) {
+        const openingHours = formatOpeningHours(place.currentOpeningHours);
+        cafeContactContainer.innerHTML = `
+          <div class="cafe-contact">
+            <div id="cafe-contact-left">
+              ${place.phoneNumber || "Phone not available"}<br>
+              ${place.address || "Address not available"}
+            </div>
+            
+            <div id="cafe-hours">
+              <h3>Opening Hours</h3>
+              <div class="hours-list">
+                ${openingHours}
+              </div>
+            </div>
+
+            <div id="cafe-contact-right">
+              ${
+                place.website
+                  ? `
+                <a href="${place.website}" target="_blank" rel="noopener noreferrer">
+                  Click here to<br>check the website
+                </a>
+              `
+                  : "Website not available"
+              }
+            </div>
+          </div>
+        `;
       }
 
       if (place.totalRatings) {
@@ -83,18 +103,48 @@ function updateReviews(reviews) {
         } else {
           const initials = review.author.charAt(0).toUpperCase();
           userIconHtml = `
-              <div class="user-icon default-icon">
-                <span class="user-initials">${initials}</span>
-              </div>
-            `;
+                <div class="user-icon default-icon">
+                  <span class="user-initials">${initials}</span>
+                </div>
+              `;
         }
 
         userInfo.innerHTML = `
-            ${userIconHtml}
-            <div class="user-name">${review.author}</div>
-            <div class="user-comment">${review.text}</div>
-          `;
+              ${userIconHtml}
+              <div class="user-name">${review.author}</div>
+              <div class="user-comment">${review.text}</div>
+            `;
       }
     }
   });
+}
+
+function formatOpeningHours(hours) {
+  if (!hours || !hours.weekdayDescriptions) {
+    return "<p>Hours not available</p>";
+  }
+
+  const today = new Date().getDay();
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  return hours.weekdayDescriptions
+    .map((description, index) => {
+      const isToday = index === today;
+      return `
+        <div class="hours-row ${isToday ? "current-day" : ""}">
+          <span class="day">${daysOfWeek[index]}</span>
+          <span class="time">${description.split(": ")[1] || "Closed"}</span>
+          ${isToday ? '<span class="today-marker">Today</span>' : ""}
+        </div>
+      `;
+    })
+    .join("");
 }

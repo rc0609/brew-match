@@ -148,17 +148,18 @@ h1 {
 
 .rating-container {
   display: flex;
-  align-items: center;
   height: auto;
+  align-items: center;
+}
+
+.rating-container i {
+  display: block;
 }
 
 #rating {
   font-size: 6em;
   font-weight: 700;
-  margin-left: -60px;
-  margin-right: 4px;
-  padding-left: 40px;
-  padding-bottom: 10px;
+  padding-bottom: 18px;
 }
 
 #rating-outer-box i {
@@ -183,7 +184,6 @@ h1 {
   flex-direction: column;
   gap: 10px;
   justify-content: flex-start;
-  width: 50%;
 }
 
 .rating-item {
@@ -249,7 +249,8 @@ h1 {
 #cafe-contact-outer-box {
   margin-top: 20px;
   width: auto;
-  height: 140px;
+  height: auto;
+  min-height: 200px;
   background-color: #ffffff;
   margin-left: 80px;
   border-radius: 30px;
@@ -266,16 +267,62 @@ h1 {
 #cafe-contact-container {
   display: flex;
   justify-content: flex-start;
-  align-items: center;
-  padding-left: 20px;
+  align-items: flex-start;
+  padding: 20px;
+  width: 100%;
 }
 
 .cafe-contact {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 15px;
-  width: auto;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+#cafe-hours {
+  padding: 0 20px;
+  border-left: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0;
+}
+
+#cafe-hours h3 {
+  font-size: 1.1em;
+  color: #344e41;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.hours-list {
+  font-size: 0.9em;
+  color: #593d3b;
+}
+
+.hours-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  align-items: center;
+}
+
+.current-day {
+  font-weight: 600;
+  color: #344e41;
+}
+
+.day {
+  min-width: 100px;
+}
+
+.time {
+  color: #666;
+}
+
+.today-marker {
+  font-size: 0.8em;
+  color: #588157;
+  margin-left: 8px;
+  font-weight: 600;
 }
 
 .cafe-contact button {
@@ -306,12 +353,21 @@ h1 {
 #cafe-contact-left {
   display: flex;
   flex-direction: column;
+  text-align: center;
 }
 
 #cafe-contact-right {
-  display: flex;
-  margin-top: -110px;
-  margin-left: 250px;
+  text-align: center;
+}
+
+#cafe-contact-right a {
+  color: #344e41;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+#cafe-contact-right a:hover {
+  color: #588157;
 }
 
 #menu {
@@ -351,7 +407,7 @@ h1 {
 }
 
 #box1 {
-  height: 300px;
+  height: 100%;
   width: 250px;
   background: #ffffff;
   margin-right: 30px;
@@ -364,7 +420,7 @@ h1 {
 }
 
 #box2 {
-  height: 300px;
+  height: 100%;
   width: 250px;
   background: #ffffff;
   margin-right: 30px;
@@ -377,7 +433,7 @@ h1 {
 }
 
 #box3 {
-  height: 300px;
+  height: 100%;
   width: 250px;
   background: #ffffff;
   border-radius: 30px;
@@ -452,10 +508,10 @@ h1 {
 
 .user-comment {
   margin-top: 15px;
+  max-height: 100%;
   font-size: 0.9em;
   color: #593d3b;
   text-align: center;
-  max-height: 100px;
   overflow-y: auto;
   padding: 0 10px;
 }
