@@ -5,24 +5,54 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>CoffeeApp - Profile</title>
+    <title>BREW Match - Profile</title>
 
     <!-- Firebase SDKs -->
     <script type="module" src="profile.js"></script>
 
-    <!-- Optional: Include your CSS -->
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="profile.css" />
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
   </head>
+
   <body>
+    <header class="header">
+      <a href="homepage.html" class="logo">
+        <img src="img/brew-match-logo-black.png" alt="Brew Match logo" />
+      </a>
+      <!--logo close-->
+      <nav class="navigation-bar">
+        <a href="#">Quiz</a>
+        <a href="#">Profiles</a>
+        <a href="about.html">About</a>
+        <div class="search-box">
+          <input type="text" />
+          <i class="fa fa-search" style="color: #593d3b"></i>
+        </div>
+        <!--search-box close-->
+      </nav>
+      <!--navigation-bar close-->
+    </header>
+    <!--header close-->
+    <main>
     <div class="profile-container">
+      <div id ="profile-container-box">
       <h2>User Profile</h2>
+      <div class="user-icon-container">
+      <div class="user-icon"></div>
+    </div><!--user-icon-container close-->
+    <div id="user-info">
       <p><strong>Name:</strong> <span id="username">Loading...</span></p>
       <p><strong>Email:</strong> <span id="email">Loading...</span></p>
+    </div> <!--user-info close-->
       <!-- Add more user-specific fields as needed -->
 
       <button id="logout">Logout</button>
 
       <p id="profile-message" class="message hidden"></p>
+    </div><!--profile-container-box close-->
     </div>
+  </main>
   </body>
 </html>

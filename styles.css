@@ -18,6 +18,57 @@ body {
   overflow: hidden;
 }
 
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #FFFFFF;
+}
+
+.header .logo img{
+  padding:2px;
+  width:120px;
+  height:auto;
+}
+
+.navigation-bar {
+  padding: 8px;
+  display: flex;
+  width:30%;
+  justify-content: space-around;
+}
+
+.navigation-bar a{
+  color: #593D3B
+}
+
+.navigation-bar a:hover {
+  color: #A3B18A; 
+}
+
+.search-box {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.search-box input {
+  width: 110px;
+  height: 18px;
+  padding: 5px;
+  border: solid #593D3B;
+  border-radius: 20px;
+  margin-top: 2px;
+}
+
+.search-box i {
+  display: flex;
+  justify-content: flex-end;
+  margin-left: 10px;
+  margin-top: 2px;
+}
+
 h2 {
   font-size: 3rem;
 }
