@@ -6,6 +6,16 @@
     <link rel="stylesheet" href="mapstyles.css" />
   </head>
   <body>
+    <header class="header">
+      <a href="homepage.html" class="logo">
+        <img src="img/brew-match-logo-black.png" alt="Brew Match logo" />
+      </a>
+      <nav class="navigation-bar">
+        <a href="/quiz.html">Quiz</a>
+        <a href="/profile.html">Profiles</a>
+        <a href="/about.html">About</a>
+      </nav>
+    </header>
     <div class="container">
       <div class="sidebar">
         <div class="search-container">
@@ -118,7 +128,9 @@
         </div>
         <div id="error"></div>
         <div id="loading">Loading nearby coffee shops...</div>
-        <ul id="places-list" class="places-list"></ul>
+        <div class="places-container">
+          <ul id="places-list" class="places-list"></ul>
+        </div>
       </div>
       <div id="map"></div>
     </div>

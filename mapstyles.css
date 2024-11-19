@@ -1,13 +1,25 @@
+* {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial, sans-serif;
   background-color: #f4f4f4;
   margin: 0;
   padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 .container {
   width: 95%;
-  max-width: 1200px;
+  max-width: 2400px;
   margin: 20px auto;
   background: #fff;
   padding: 20px;
@@ -29,7 +41,6 @@ body {
   display: none;
 }
 
-/* Search Container Styles */
 .search-container {
   position: sticky;
   top: 0;
@@ -38,7 +49,7 @@ body {
   margin-bottom: 15px;
   z-index: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: calc(100% - 30px);
+  width: 100%;
 }
 
 .search-wrapper {
@@ -86,7 +97,6 @@ body {
   pointer-events: none;
 }
 
-/* Filter Styles */
 .filter-buttons {
   margin-top: 10px;
 }
@@ -224,7 +234,6 @@ body {
   transform: rotate(180deg);
 }
 
-/* Map and Places List Styles */
 #map {
   flex: 1;
   height: 80vh;
@@ -485,6 +494,48 @@ body {
 .status.closed {
   background-color: #ffe6e6;
   color: #660000;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header .logo img {
+  padding: 2px;
+  width: 120px;
+  height: auto;
+}
+
+.navigation-bar {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navigation-bar a {
+  color: #593d3b;
+  transition: color 0.3s;
+}
+
+.navigation-bar a:hover {
+  color: #a3b18a;
+}
+
+.places-container {
+  height: 100%;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.places-container::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes spin {
