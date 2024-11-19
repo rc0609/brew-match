@@ -563,11 +563,6 @@ function success(pos) {
       );
 
       const data = await response.json();
-
-      console.log("API Response for", place.displayName.text + ":", data);
-      console.log("Store Data:", data?.data?.[0]?.[0]);
-      console.log("Popular Times:", data?.data?.[0]?.[0]?.popular_times);
-
       const storeData = data?.data?.[0]?.[0];
 
       if (storeData) {
@@ -582,6 +577,7 @@ function success(pos) {
         const currentHourData = todayPopularTimes?.popular_times?.find(
           (time) => time.hour === currentHour
         );
+
         const getGaugeFillClass = (percentage) => {
           if (percentage <= 25) return "gauge-fill-low";
           if (percentage <= 50) return "gauge-fill-medium";
@@ -614,11 +610,18 @@ function success(pos) {
           todayPopularTimes?.popular_times?.findIndex(
             (time) => time.hour === currentHour
           ) || 0;
+
         const nextHours =
           todayPopularTimes?.popular_times?.slice(
             currentTimeIndex,
             currentTimeIndex + 4
           ) || [];
+
+        const todayHours =
+          place.currentOpeningHours?.weekdayDescriptions[currentDay]?.split(
+            ": "
+          )[1] || "Hours not available";
+
         const contentString = `
           <div class="info-window-container">
             <div class="info-window-title">${place.displayName.text}</div>
@@ -661,12 +664,13 @@ function success(pos) {
             ${
               place.currentOpeningHours
                 ? `
-              <div class="working-hours">
-                <strong>Hours:</strong> ${
-                  place.currentOpeningHours.weekdayDescriptions[now.getDay()]
-                }
-              </div>
-            `
+                  <div class="working-hours">
+                    <div class="status ${isOpen ? "open" : "closed"}">
+                      ${isOpen ? "✅ Open" : "❌ Closed"}
+                    </div>
+                    <strong>Today's Hours:</strong> ${todayHours}
+                  </div>
+                `
                 : ""
             }
           </div>
