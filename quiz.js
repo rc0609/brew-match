@@ -405,6 +405,9 @@ async function saveQuizResults() {
 
     const recommendations = getRecommendations(quizState.answers);
     displayRecommendations(recommendations);
+
+    displayAnswers();
+    
   } catch (error) {
     console.error("Error saving quiz results:", error);
     const errorMessage = document.getElementById("error-message");
@@ -428,4 +431,14 @@ function showResults() {
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM Content Loaded, initializing quiz");
   initializeQuiz();
-});
+})
+
+function displayAnswers() {
+    const answersContainer = document.getElementById("recommendations-list"); 
+    answersContainer.innerHTML = `
+      <h3>Your Answers:</h3>
+      <pre>${JSON.stringify(quizState.answers, null, 2)}</pre>
+    `;
+  }
+  
+
