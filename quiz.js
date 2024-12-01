@@ -28,6 +28,7 @@ const db = getFirestore();
 
 const apiKey = "AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E";
 
+//holds the current quiz state
 let quizState = {
   currentQuestion: 0,
   answers: {},
@@ -113,6 +114,7 @@ const quizQuestions = [
   },
 ];
 
+//makes a call to google places API to retrieve coffee shops within 1.5km distance of the user 
 async function fetchNearbyPlaces(location) {
   console.log("Starting fetchNearbyPlaces");
   const url = "https://places.googleapis.com/v1/places:searchNearby";
@@ -147,7 +149,7 @@ async function fetchNearbyPlaces(location) {
     console.log("API response received:", result);
 
     if (response.ok) {
-      quizState.allPlaces = result.places || [];
+      quizState.allPlaces = result.places || []; //returned coffee shops are stored in an array in quizstate object
       console.log("Sending places to backend");
       await sendCoffeeShopsToBackend(quizState.allPlaces);
       console.log("Places sent to backend successfully");
@@ -244,7 +246,7 @@ function getRecommendations(preferences) {
   return recommendedPlaces.slice(0, 5);
 }
 
-function displayRecommendations(recommendations) {
+/*function displayRecommendations(recommendations) {
   const container = document.getElementById("recommendations-container");
   const list = document.getElementById("recommendations-list");
   container.style.display = "block";
@@ -269,7 +271,7 @@ function displayRecommendations(recommendations) {
 
     list.appendChild(card);
   });
-}
+}*/
 
 async function initializeQuiz() {
   const auth = getAuth();
@@ -398,13 +400,23 @@ async function saveQuizResults() {
       throw new Error("User not authenticated");
     }
 
+    console.log("Quiz Answers:", quizState.answers); 
+    const quizContainer = document.getElementById("quiz-container");
+    quizContainer.innerHTML = '<h2>Thanks for completing the quiz!</h2>';
+   
+    // Encode user answers
+    const numericalVector = encodeAnswers(quizState.answers, quizQuestions);
+    console.log("Encoded Vector:", numericalVector);
+    
+
     await setDoc(doc(db, "userPreferences", auth.currentUser.uid), {
       preferences: quizState.answers,
       timestamp: new Date().toISOString(),
     });
 
-    const recommendations = getRecommendations(quizState.answers);
-    displayRecommendations(recommendations);
+
+    /*const recommendations = getRecommendations(quizState.answers);
+    displayRecommendations(recommendations);*/
   } catch (error) {
     console.error("Error saving quiz results:", error);
     const errorMessage = document.getElementById("error-message");
@@ -429,3 +441,26 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM Content Loaded, initializing quiz");
   initializeQuiz();
 });
+
+// Function to encode user answers
+function encodeAnswers(answers, quizQuestions) {
+  const encodedVector = [];
+
+  for (const question of quizQuestions) {
+    const userAnswer = answers[question.id];
+
+    // Find the index of the user's answer 
+    const encodedValue = question.options.findIndex(
+      (option) => option.value == userAnswer
+    );
+
+    if (encodedValue !== -1) {
+      encodedVector.push(encodedValue);
+    } else {
+      console.error(`Answer for question "${question.id}" not found!`);
+      encodedVector.push(-1); // Placeholder for missing answers
+    }
+  }
+
+  return encodedVector;
+}
