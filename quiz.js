@@ -414,9 +414,11 @@ async function saveQuizResults() {
       timestamp: new Date().toISOString(),
     });
 
+    const recommendations = getRecommendations(quizState.answers);
+    displayRecommendations(recommendations);
 
-    /*const recommendations = getRecommendations(quizState.answers);
-    displayRecommendations(recommendations);*/
+    displayAnswers();
+    
   } catch (error) {
     console.error("Error saving quiz results:", error);
     const errorMessage = document.getElementById("error-message");
