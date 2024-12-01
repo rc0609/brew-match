@@ -11,12 +11,16 @@ body {
 }
 
 .navbar {
-  background-color: #4285f4;
+  background-color: #a3b18a;
   color: white;
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.logo {
+  width: 70%;
 }
 
 .nav-brand {
@@ -33,7 +37,7 @@ body {
 #logoutBtn {
   padding: 0.5rem 1rem;
   background-color: white;
-  color: #4285f4;
+  color: #a3b18a;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -41,7 +45,7 @@ body {
 
 .room-container {
   display: flex;
-  height: calc(100vh - 64px);
+  height: 92vh;
   padding: 20px;
   gap: 20px;
 }
@@ -65,21 +69,22 @@ body {
 
 .room-btn {
   padding: 12px;
-  border: 2px solid #4285f4;
+  border: 2px solid #a3b18a;
   border-radius: 6px;
   background: white;
-  color: #4285f4;
+  color: #a3b18a;
   cursor: pointer;
   transition: all 0.3s ease;
+  height: 6em;
 }
 
 .room-btn:hover {
-  background: #4285f4;
+  background: #a3b18a;
   color: white;
 }
 
 .room-btn.active {
-  background: #4285f4;
+  background: #a3b18a;
   color: white;
 }
 
@@ -164,7 +169,7 @@ body {
 }
 
 .message.sent {
-  background: #4285f4;
+  background: #a3b18a;
   color: white;
   align-self: flex-end;
 }
@@ -190,7 +195,7 @@ body {
 
 #sendMessage {
   padding: 8px 16px;
-  background: #4285f4;
+  background: #a3b18a;
   color: white;
   border: none;
   border-radius: 4px;
@@ -241,6 +246,7 @@ body {
 
 #brushSize {
   width: 100px;
+  accent-color: #a3b18a;
 }
 
 @media (max-width: 1024px) {
