@@ -408,16 +408,32 @@ async function saveQuizResults() {
     const numericalVector = encodeAnswers(quizState.answers, quizQuestions);
     console.log("Encoded Vector:", numericalVector);
     
+    // CSV file path
+    const csvFilePath = "coffee_shops.csv";
+
+    // Parse CSV file
+    Papa.parse(csvFilePath, {
+    download: true,
+    header: true, // Treat first row as column names
+    complete: function(results) {
+      const coffeeShops = results.data; // Parsed coffee shop data
+      console.log("Parsed Coffee Shops:", coffeeShops);
+
+      // Continue with the next step: encode features
+      const encodedShops = processCoffeeShops(coffeeShops);
+      findBestMatch(numericalVector, encodedShops, coffeeShops);
+      }
+    });
+    
 
     await setDoc(doc(db, "userPreferences", auth.currentUser.uid), {
       preferences: quizState.answers,
       timestamp: new Date().toISOString(),
     });
 
-    const recommendations = getRecommendations(quizState.answers);
+    /*const recommendations = getRecommendations(quizState.answers);
     displayRecommendations(recommendations);
-
-    displayAnswers();
+    displayAnswers();*/
     
   } catch (error) {
     console.error("Error saving quiz results:", error);
@@ -466,3 +482,133 @@ function encodeAnswers(answers, quizQuestions) {
 
   return encodedVector;
 }
+
+
+
+function processCoffeeShops(coffeeShops) {
+  const encodedShops = coffeeShops.map((shop) => {
+    return [
+      encodeFeature(shop.pricePreference, ["1", "2", "3"]),
+      encodeAtmosphere(shop.takeout, shop.delivery, shop.dinein), // Logic for atmosphere
+      encodeFoodImportance(shop.servesCoffee, shop.servesDessert, shop.servesBreakfast), // Logic for foodImportance
+      encodeTiming(shop.currentOpeningHours), // Logic for timing based on weekdayDescriptions
+      encodeAccessibility(shop.paymentOptions, shop.accessibilityOptions, shop.parkingOptions), // Logic for accessibility
+    ];
+  });
+
+  console.log("Encoded Coffee Shop Vectors:", encodedShops);
+  return encodedShops;
+}
+
+function encodeFeature(value, options) {
+  return options.indexOf(value);
+}
+
+// Logic for encoding atmosphere based on boolean features
+function encodeAtmosphere(takeout, delivery, dinein) {
+  if (takeout && !delivery && !dinein) {
+    return 0; // "quick" corresponds to index 0
+  } else if (takeout && delivery && !dinein) {
+    return 1; // "casual" corresponds to index 1
+  } else if (takeout && delivery && dinein) {
+    return 2; // "full" corresponds to index 2
+  } else {
+    return -1; // Invalid or undefined state
+  }
+}
+
+// Logic for encoding foodImportance based on boolean features
+function encodeFoodImportance(servesCoffee, servesDessert, servesBreakfast) {
+  if (servesCoffee && !servesDessert && !servesBreakfast) {
+    return 0; // "coffee" corresponds to index 0
+  } else if (servesCoffee && servesDessert && !servesBreakfast) {
+    return 1; // "snacks" corresponds to index 1
+  } else if (servesCoffee && servesDessert && servesBreakfast) {
+    return 2; // "full" corresponds to index 2
+  } else {
+    return -1; // Invalid or undefined state
+  }
+}
+
+// Logic for encoding timing based on "weekdayDescriptions"
+function encodeTiming(currentOpeningHours) {
+  try {
+    const descriptions = currentOpeningHours?.weekdayDescriptions;
+    if (!descriptions) return -1;
+
+    const monday = descriptions.find((desc) => desc.startsWith("Monday:"));
+    if (!monday) return -1;
+
+    const timeRange = monday.split(": ")[1];
+    const [openingTime] = timeRange.split("â€“").map((time) => time.trim());
+    const openingHour = parseInt(openingTime.split(":")[0]);
+    const openingPeriod = openingTime.includes("PM") && openingHour !== 12 ? openingHour + 12 : openingHour;
+
+    if (openingPeriod < 9) return 0;
+    if (openingPeriod >= 11 && openingPeriod < 17) return 1;
+    if (openingPeriod >= 17) return 2;
+
+    return -1;
+  } catch {
+    return -1;
+  }
+}
+
+// Logic for encoding accessibility
+function encodeAccessibility(paymentOptions, accessibilityOptions, parkingOptions) {
+  // Check paymentOptions
+  if (paymentOptions && Object.keys(paymentOptions).length > 0) {
+    if (paymentOptions.acceptsCashOnly === true) {
+      return -1; // Move to next column
+    }
+    if (paymentOptions.acceptsCreditCards || paymentOptions.acceptsDebitCards) {
+      return 2; // Index 2 if credit/debit cards are accepted
+    }
+  }
+
+  // Check accessibilityOptions
+  if (accessibilityOptions && Object.keys(accessibilityOptions).length > 0) {
+    const values = Object.values(accessibilityOptions);
+    const trueCount = values.filter((val) => val === true).length;
+    if (trueCount >= 2) {
+      return 1; // Index 1 if two or more fields are true
+    }
+  }
+
+  // Check parkingOptions
+  if (parkingOptions && Object.keys(parkingOptions).length > 0) {
+    const hasTrueValue = Object.values(parkingOptions).some((val) => val === true);
+    if (hasTrueValue) {
+      return 0; // Index 0 if any parking option is true
+    }
+  }
+
+  // Default case
+  return -1; // No valid data found
+}
+
+
+function cosineSimilarity(vec1, vec2) {
+  const dotProduct = vec1.reduce((sum, val, i) => sum + val * vec2[i], 0);
+  const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val ** 2, 0));
+  const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val ** 2, 0));
+  return dotProduct / (magnitude1 * magnitude2);
+}
+
+function findBestMatch(userVector, shopVectors, coffeeShops) {
+  let bestMatch = null;
+  let bestScore = -1;
+
+  shopVectors.forEach((shopVector, index) => {
+    const similarity = cosineSimilarity(userVector, shopVector);
+    console.log(`Similarity with ${coffeeShops[index].name}:`, similarity);
+
+    if (similarity > bestScore) {
+      bestScore = similarity;
+      bestMatch = coffeeShops[index];
+    }
+  });
+
+  console.log("Best Match:", bestMatch);
+}
+
