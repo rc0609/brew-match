@@ -468,7 +468,7 @@ function encodeAnswers(answers, quizQuestions) {
     const userAnswer = answers[question.id];
 
     // Find the index of the user's answer 
-    const encodedValue = question.options.findIndex(
+    const encodedValue = 1 + question.options.findIndex(
       (option) => option.value == userAnswer
     );
 
@@ -486,83 +486,229 @@ function encodeAnswers(answers, quizQuestions) {
 
 
 function processCoffeeShops(coffeeShops) {
-  const encodedShops = coffeeShops.map((shop) => {
-    return [
-      encodeFeature(shop.pricePreference, ["1", "2", "3"]),
-      encodeAtmosphere(shop.takeout, shop.delivery, shop.dinein), // Logic for atmosphere
-      encodeFoodImportance(shop.servesCoffee, shop.servesDessert, shop.servesBreakfast), // Logic for foodImportance
-      encodeTiming(shop.currentOpeningHours), // Logic for timing based on weekdayDescriptions
-      encodeAccessibility(shop.paymentOptions, shop.accessibilityOptions, shop.parkingOptions), // Logic for accessibility
-    ];
-  });
+  const encodedShops = coffeeShops
+    .map((shop) => {
+
+      const atmosphereIndex = encodeAtmosphere(shop.takeout, shop.delivery, shop.dineIn);
+      const foodIndex = encodeFoodImportance(shop.servesCoffee, shop.servesDessert, shop.servesBreakfast);
+      if (atmosphereIndex === null || foodIndex === null) {
+        return null; // Exclude shops with no valid atmosphere
+      }
+      return [
+        encodeFeature(shop.priceLevel, ["1", "2", "3"]),
+        atmosphereIndex, // Encoded atmosphere
+        foodIndex, // Encoded foodImportance
+        encodeTiming(shop.currentOpeningHours), // Logic for timing based on weekdayDescriptions
+        encodeAccessibility(shop.paymentOptions, shop.accessibilityOptions, shop.parkingOptions), // Logic for accessibility
+      ];
+    })
+    .filter((shop) => shop !== null); // Remove excluded shops
 
   console.log("Encoded Coffee Shop Vectors:", encodedShops);
+  
   return encodedShops;
-}
+  }
 
 function encodeFeature(value, options) {
-  return options.indexOf(value);
+  return options.indexOf(value)+2;
 }
 
-// Logic for encoding atmosphere based on boolean features
-function encodeAtmosphere(takeout, delivery, dinein) {
-  if (takeout && !delivery && !dinein) {
-    return 0; // "quick" corresponds to index 0
-  } else if (takeout && delivery && !dinein) {
-    return 1; // "casual" corresponds to index 1
-  } else if (takeout && delivery && dinein) {
-    return 2; // "full" corresponds to index 2
-  } else {
-    return -1; // Invalid or undefined state
+function convertToBoolean(value) {
+  if (typeof value === "string") {
+    return value.toUpperCase() === "TRUE"; // Normalize the string to uppercase and compare
+  }
+  return false; // Return false if the value is not a string
+}
+
+function encodeAtmosphere(takeout, delivery, dineIn) {
+
+  takeout = convertToBoolean(takeout);
+  delivery = convertToBoolean(delivery);
+  dineIn = convertToBoolean(dineIn);
+
+
+  // Guard clause: If none are true, exclude the coffee shop
+  if (!takeout && !delivery && !dineIn) {
+    console.log("returning null");
+    return null; // Return `null` or a specific marker to indicate exclusion
+  }
+
+  // Case 1: Only takeout is true
+  if (takeout && !delivery && !dineIn) {
+    return 1; // "quick"
+  }
+  // Case 2: Takeout and delivery are true, but dineIn is false
+  else if (takeout && delivery && !dineIn) {
+    return 2; // "casual"
+  }
+  // Case 3: All three are true
+  else if (takeout && delivery && dineIn) {
+    return 3; // "full"
+  }
+  // Case 4: Only delivery is true
+  else if (!takeout && delivery && !dineIn) {
+    return 2; // Default to "casual" for delivery only
+  }
+  // Case 5: Only dineIn is true
+  else if (!takeout && !delivery && dineIn) {
+    return 3; // Default to "full" for dineIn only
+  }
+  // Case 6: Takeout and dineIn are true, but delivery is false
+  else if (takeout && !delivery && dineIn) {
+    return 3; // Default to "full" (assume a full experience)
+  }
+  // Case 7: Delivery and dineIn are true, but takeout is false
+  else if (!takeout && delivery && dineIn) {
+    return 3; // Default to "full"
+  }
+  // Default case (should never occur if all combinations are listed)
+  else {
+    console.log("returning null 2 ");
+    return null; // Exclude the coffee shop
   }
 }
 
+  
 // Logic for encoding foodImportance based on boolean features
 function encodeFoodImportance(servesCoffee, servesDessert, servesBreakfast) {
-  if (servesCoffee && !servesDessert && !servesBreakfast) {
-    return 0; // "coffee" corresponds to index 0
-  } else if (servesCoffee && servesDessert && !servesBreakfast) {
-    return 1; // "snacks" corresponds to index 1
-  } else if (servesCoffee && servesDessert && servesBreakfast) {
-    return 2; // "full" corresponds to index 2
-  } else {
-    return -1; // Invalid or undefined state
+
+    servesCoffee = convertToBoolean(servesCoffee);
+    servesBreakfast = convertToBoolean(servesBreakfast);
+    servesDessert = convertToBoolean(servesDessert);
+
+    //console.log(servesCoffee, servesDessert, servesBreakfast);
+  
+    // Case 1: Only serves coffee
+    if (servesCoffee && !servesDessert && !servesBreakfast) {
+      return 1; // "coffee" (basic offering)
+    }
+    // Case 2: Serves coffee and dessert, but not breakfast
+    else if (servesCoffee && servesDessert && !servesBreakfast) {
+      return 2; // "snacks" (coffee and dessert pair well for snacks)
+    }
+    // Case 3: Serves coffee, dessert, and breakfast
+    else if (servesCoffee && servesDessert && servesBreakfast) {
+      return 3; // "full" (comprehensive offering)
+    }
+    // Case 4: Serves coffee and breakfast, but not dessert
+    else if (servesCoffee && !servesDessert && servesBreakfast) {
+      return 3; // "full" (coffee and breakfast is substantial)
+    }
+    // Case 5: Only serves dessert
+    else if (!servesCoffee && servesDessert && !servesBreakfast) {
+      return 2; // "snacks" (dessert is similar to snack offerings)
+    }
+    // Case 6: Serves dessert and breakfast, but not coffee
+    else if (!servesCoffee && servesDessert && servesBreakfast) {
+      return 3; // "full" (dessert and breakfast combined is comprehensive)
+    }
+    // Case 7: Only serves breakfast
+    else if (!servesCoffee && !servesDessert && servesBreakfast) {
+      return 3; // "full" (breakfast alone is a substantial offering)
+    }
+    // Case 8: None of the above
+    else if (!servesCoffee && !servesDessert && !servesBreakfast) {
+      return null; // "invalid" (no offerings)
+    }
   }
-}
+  
+  
+
 
 // Logic for encoding timing based on "weekdayDescriptions"
 function encodeTiming(currentOpeningHours) {
   try {
-    const descriptions = currentOpeningHours?.weekdayDescriptions;
-    if (!descriptions) return -1;
+    // Step 1: Locate the `weekdayDescriptions` segment
+    const startIndex = currentOpeningHours.indexOf("weekdayDescriptions");
+    if (startIndex === -1) {
+      console.log("weekdayDescriptions not found");
+      return 0;
+    }
 
-    const monday = descriptions.find((desc) => desc.startsWith("Monday:"));
-    if (!monday) return -1;
+    // Extract the substring starting from `weekdayDescriptions`
+    const substring = currentOpeningHours.slice(startIndex);
+    console.log("Extracted substring starting with weekdayDescriptions:", substring);
 
-    const timeRange = monday.split(": ")[1];
-    const [openingTime] = timeRange.split("â€“").map((time) => time.trim());
-    const openingHour = parseInt(openingTime.split(":")[0]);
-    const openingPeriod = openingTime.includes("PM") && openingHour !== 12 ? openingHour + 12 : openingHour;
+    // Step 2: Extract the array content
+    const arrayStartIndex = substring.indexOf("[");
+    const arrayEndIndex = substring.indexOf("]");
+    if (arrayStartIndex === -1 || arrayEndIndex === -1) {
+      console.log("Array not properly formatted");
+      return 0;
+    }
 
-    if (openingPeriod < 9) return 0;
-    if (openingPeriod >= 11 && openingPeriod < 17) return 1;
-    if (openingPeriod >= 17) return 2;
+    const arrayContent = substring.slice(arrayStartIndex + 1, arrayEndIndex);
+    console.log("Extracted array content:", arrayContent);
 
-    return -1;
-  } catch {
-    return -1;
+    // Step 3: Split the array into individual day entries
+    const days = arrayContent.split("',").map((day) => day.replace(/['"]/g, "").trim());
+    console.log("Split days array:", days);
+
+    // Step 4: Find the entry for Monday
+    const mondayEntry = days.find((day) => day.startsWith("Monday:"));
+    console.log("Monday entry:", mondayEntry);
+    if (!mondayEntry) {
+      console.log("Monday not found");
+      return 0;
+    }
+
+    // Step 5: Extract the first number after the colon
+    const timePart = mondayEntry.split(":")[1]; // Get the part after the first colon
+    if (!timePart) {
+      console.log("Invalid time part in Monday entry");
+      return 0;
+    }
+
+    const cleanedTime = timePart.replace(/\\u202f/g, ""); // Remove any garbage characters
+    const [timeString] = cleanedTime.split("â€“").map((time) => time.trim());
+    const openingTime = timeString.match(/\d+:\d+\s*(AM|PM)/i)?.[0]; // Extract the time with AM/PM
+
+    console.log("Extracted opening time:", openingTime);
+
+    if (!openingTime) {
+      console.log("Invalid opening time");
+      return 0;
+    }
+
+    // Step 6: Parse opening time to determine opening period
+    const openingHour = parseInt(openingTime.split(":")[0], 10);
+    const isPM = openingTime.includes("PM");
+    const normalizedHour = isPM && openingHour !== 12 ? openingHour + 12 : openingHour;
+
+    console.log("Normalized opening hour (24-hour):", normalizedHour);
+
+    // Step 7: Apply logic to determine index based on opening period
+    if (normalizedHour < 9) {
+      console.log("Returning 1 (morning)");
+      return 1;
+    }
+    if (normalizedHour >= 11 && normalizedHour < 17) {
+      console.log("Returning 2 (daytime)");
+      return 2;
+    }
+    if (normalizedHour >= 17) {
+      console.log("Returning 3 (evening)");
+      return 3;
+    }
+
+    console.log("Default return 0");
+    return 0;
+  } catch (error) {
+    console.error("Error in encodeTiming:", error);
+    return 0;
   }
 }
+
 
 // Logic for encoding accessibility
 function encodeAccessibility(paymentOptions, accessibilityOptions, parkingOptions) {
   // Check paymentOptions
   if (paymentOptions && Object.keys(paymentOptions).length > 0) {
     if (paymentOptions.acceptsCashOnly === true) {
-      return -1; // Move to next column
+      return 0; // Move to next column
     }
     if (paymentOptions.acceptsCreditCards || paymentOptions.acceptsDebitCards) {
-      return 2; // Index 2 if credit/debit cards are accepted
+      return 3; // Index 2 if credit/debit cards are accepted
     }
   }
 
@@ -571,7 +717,7 @@ function encodeAccessibility(paymentOptions, accessibilityOptions, parkingOption
     const values = Object.values(accessibilityOptions);
     const trueCount = values.filter((val) => val === true).length;
     if (trueCount >= 2) {
-      return 1; // Index 1 if two or more fields are true
+      return 2; // Index 1 if two or more fields are true
     }
   }
 
@@ -579,12 +725,12 @@ function encodeAccessibility(paymentOptions, accessibilityOptions, parkingOption
   if (parkingOptions && Object.keys(parkingOptions).length > 0) {
     const hasTrueValue = Object.values(parkingOptions).some((val) => val === true);
     if (hasTrueValue) {
-      return 0; // Index 0 if any parking option is true
+      return 1; // Index 0 if any parking option is true
     }
   }
 
   // Default case
-  return -1; // No valid data found
+  return 0; // No valid data found
 }
 
 
@@ -593,6 +739,7 @@ function cosineSimilarity(vec1, vec2) {
   const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val ** 2, 0));
   const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val ** 2, 0));
   return dotProduct / (magnitude1 * magnitude2);
+
 }
 
 function findBestMatch(userVector, shopVectors, coffeeShops) {
@@ -600,6 +747,7 @@ function findBestMatch(userVector, shopVectors, coffeeShops) {
   let bestScore = -1;
 
   shopVectors.forEach((shopVector, index) => {
+    console.log(coffeeShops[index].name, shopVector, coffeeShops[index].id);
     const similarity = cosineSimilarity(userVector, shopVector);
     console.log(`Similarity with ${coffeeShops[index].name}:`, similarity);
 
