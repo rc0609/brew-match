@@ -1,5 +1,9 @@
 ![Logo](img/brew-match-logo-black.png)
-**#BrewMatch#**
+
+
+#BrewMatch
+
+
 A coffee shop directory that matches users with coffee shops based on their preferences and lifestyle.
 
 ## Table of Contents
