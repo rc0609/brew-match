@@ -9,24 +9,15 @@ import {
   setDoc,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+import config from "./config.js";
+const apiKey = config.googlePlaces.apiKey;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBQIoG1AKHFRkJv7VZ6Z39ob-Fm8lYYo5w",
-  authDomain: "brew-match.firebaseapp.com",
-  projectId: "brew-match",
-  storageBucket: "brew-match.appspot.com",
-  messagingSenderId: "871621577528",
-  appId: "1:871621577528:web:d8af0d672974024d954fcd",
-  measurementId: "G-Y6YQ6NBFMX",
-  databaseURL: "https://brew-match-default-rtdb.firebaseio.com/",
-};
+const firebaseConfig = config.firebase;
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth();
 const db = getFirestore();
-
-const apiKey = "AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E";
 
 //holds the current quiz state
 let quizState = {
@@ -114,7 +105,7 @@ const quizQuestions = [
   },
 ];
 
-//makes a call to google places API to retrieve coffee shops within 1.5km distance of the user 
+//makes a call to google places API to retrieve coffee shops within 1.5km distance of the user
 async function fetchNearbyPlaces(location) {
   console.log("Starting fetchNearbyPlaces");
   const url = "https://places.googleapis.com/v1/places:searchNearby";
@@ -400,32 +391,31 @@ async function saveQuizResults() {
       throw new Error("User not authenticated");
     }
 
-    console.log("Quiz Answers:", quizState.answers); 
+    console.log("Quiz Answers:", quizState.answers);
     const quizContainer = document.getElementById("quiz-container");
-    quizContainer.innerHTML = '<h2>Thanks for completing the quiz!</h2>';
-   
+    quizContainer.innerHTML = "<h2>Thanks for completing the quiz!</h2>";
+
     // Encode user answers
     const numericalVector = encodeAnswers(quizState.answers, quizQuestions);
     console.log("Encoded Vector:", numericalVector);
-    
+
     // CSV file path
     const csvFilePath = "coffee_shops.csv";
 
     // Parse CSV file
     Papa.parse(csvFilePath, {
-    download: true,
-    header: true, // Treat first row as column names
-    complete: function(results) {
-      const coffeeShops = results.data; // Parsed coffee shop data
-      console.log("Parsed Coffee Shops:", coffeeShops);
+      download: true,
+      header: true, // Treat first row as column names
+      complete: function (results) {
+        const coffeeShops = results.data; // Parsed coffee shop data
+        console.log("Parsed Coffee Shops:", coffeeShops);
 
-      // Continue with the next step: encode features
-      const encodedShops = processCoffeeShops(coffeeShops);
-      const array = findBestMatch(numericalVector, encodedShops, coffeeShops);
-      displayMatches(array);
-      }
+        // Continue with the next step: encode features
+        const encodedShops = processCoffeeShops(coffeeShops);
+        const array = findBestMatch(numericalVector, encodedShops, coffeeShops);
+        displayMatches(array);
+      },
     });
-    
 
     await setDoc(doc(db, "userPreferences", auth.currentUser.uid), {
       preferences: quizState.answers,
@@ -435,7 +425,6 @@ async function saveQuizResults() {
     /*const recommendations = getRecommendations(quizState.answers);
     displayRecommendations(recommendations);
     displayAnswers();*/
-    
   } catch (error) {
     console.error("Error saving quiz results:", error);
     const errorMessage = document.getElementById("error-message");
@@ -447,15 +436,16 @@ async function saveQuizResults() {
 
 // Function to display top matches
 function displayMatches(topMatch) {
+  document.getElementById("output").innerHTML =
+    "<h2>Recommended Coffee Shops</h2>";
 
-  document.getElementById('output').innerHTML = '<h2>Recommended Coffee Shops</h2>'
-
-  topMatch.forEach((match) => {  
-    document.getElementById('output').innerHTML += `<p>${match.coffeeShop.name}</p>`;
+  topMatch.forEach((match) => {
+    document.getElementById(
+      "output"
+    ).innerHTML += `<p>${match.coffeeShop.name}</p>`;
   });
 
-
- /* console.log('Top Matches:', topMatch); // Debug log
+  /* console.log('Top Matches:', topMatch); // Debug log
   const recommendationsContainer = document.getElementById('recommendations-container');
   const recommendationsList = document.getElementById('recommendations-list');
   console.log('Recommendations Container:', recommendationsContainer); // Debug log
@@ -479,8 +469,6 @@ function displayMatches(topMatch) {
   });*/
 }
 
-
-
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM Content Loaded, initializing quiz");
   initializeQuiz();
@@ -493,10 +481,9 @@ function encodeAnswers(answers, quizQuestions) {
   for (const question of quizQuestions) {
     const userAnswer = answers[question.id];
 
-    // Find the index of the user's answer 
-    const encodedValue = 1 + question.options.findIndex(
-      (option) => option.value == userAnswer
-    );
+    // Find the index of the user's answer
+    const encodedValue =
+      1 + question.options.findIndex((option) => option.value == userAnswer);
 
     if (encodedValue !== -1) {
       encodedVector.push(encodedValue);
@@ -509,14 +496,19 @@ function encodeAnswers(answers, quizQuestions) {
   return encodedVector;
 }
 
-
-
 function processCoffeeShops(coffeeShops) {
   const encodedShops = coffeeShops
     .map((shop) => {
-
-      const atmosphereIndex = encodeAtmosphere(shop.takeout, shop.delivery, shop.dineIn);
-      const foodIndex = encodeFoodImportance(shop.servesCoffee, shop.servesDessert, shop.servesBreakfast);
+      const atmosphereIndex = encodeAtmosphere(
+        shop.takeout,
+        shop.delivery,
+        shop.dineIn
+      );
+      const foodIndex = encodeFoodImportance(
+        shop.servesCoffee,
+        shop.servesDessert,
+        shop.servesBreakfast
+      );
       if (atmosphereIndex === null || foodIndex === null) {
         return null; // Exclude shops with no valid atmosphere
       }
@@ -525,18 +517,22 @@ function processCoffeeShops(coffeeShops) {
         atmosphereIndex, // Encoded atmosphere
         foodIndex, // Encoded foodImportance
         encodeTiming(shop.currentOpeningHours), // Logic for timing based on weekdayDescriptions
-        encodeAccessibility(shop.paymentOptions, shop.accessibilityOptions, shop.parkingOptions), // Logic for accessibility
+        encodeAccessibility(
+          shop.paymentOptions,
+          shop.accessibilityOptions,
+          shop.parkingOptions
+        ), // Logic for accessibility
       ];
     })
     .filter((shop) => shop !== null); // Remove excluded shops
 
   console.log("Encoded Coffee Shop Vectors:", encodedShops);
-  
+
   return encodedShops;
-  }
+}
 
 function encodeFeature(value, options) {
-  return options.indexOf(value)+2;
+  return options.indexOf(value) + 2;
 }
 
 function convertToBoolean(value) {
@@ -547,11 +543,9 @@ function convertToBoolean(value) {
 }
 
 function encodeAtmosphere(takeout, delivery, dineIn) {
-
   takeout = convertToBoolean(takeout);
   delivery = convertToBoolean(delivery);
   dineIn = convertToBoolean(dineIn);
-
 
   // Guard clause: If none are true, exclude the coffee shop
   if (!takeout && !delivery && !dineIn) {
@@ -594,52 +588,47 @@ function encodeAtmosphere(takeout, delivery, dineIn) {
   }
 }
 
-  
 // Logic for encoding foodImportance based on boolean features
 function encodeFoodImportance(servesCoffee, servesDessert, servesBreakfast) {
+  servesCoffee = convertToBoolean(servesCoffee);
+  servesBreakfast = convertToBoolean(servesBreakfast);
+  servesDessert = convertToBoolean(servesDessert);
 
-    servesCoffee = convertToBoolean(servesCoffee);
-    servesBreakfast = convertToBoolean(servesBreakfast);
-    servesDessert = convertToBoolean(servesDessert);
+  //console.log(servesCoffee, servesDessert, servesBreakfast);
 
-    //console.log(servesCoffee, servesDessert, servesBreakfast);
-  
-    // Case 1: Only serves coffee
-    if (servesCoffee && !servesDessert && !servesBreakfast) {
-      return 1; // "coffee" (basic offering)
-    }
-    // Case 2: Serves coffee and dessert, but not breakfast
-    else if (servesCoffee && servesDessert && !servesBreakfast) {
-      return 2; // "snacks" (coffee and dessert pair well for snacks)
-    }
-    // Case 3: Serves coffee, dessert, and breakfast
-    else if (servesCoffee && servesDessert && servesBreakfast) {
-      return 3; // "full" (comprehensive offering)
-    }
-    // Case 4: Serves coffee and breakfast, but not dessert
-    else if (servesCoffee && !servesDessert && servesBreakfast) {
-      return 3; // "full" (coffee and breakfast is substantial)
-    }
-    // Case 5: Only serves dessert
-    else if (!servesCoffee && servesDessert && !servesBreakfast) {
-      return 2; // "snacks" (dessert is similar to snack offerings)
-    }
-    // Case 6: Serves dessert and breakfast, but not coffee
-    else if (!servesCoffee && servesDessert && servesBreakfast) {
-      return 3; // "full" (dessert and breakfast combined is comprehensive)
-    }
-    // Case 7: Only serves breakfast
-    else if (!servesCoffee && !servesDessert && servesBreakfast) {
-      return 3; // "full" (breakfast alone is a substantial offering)
-    }
-    // Case 8: None of the above
-    else if (!servesCoffee && !servesDessert && !servesBreakfast) {
-      return null; // "invalid" (no offerings)
-    }
+  // Case 1: Only serves coffee
+  if (servesCoffee && !servesDessert && !servesBreakfast) {
+    return 1; // "coffee" (basic offering)
   }
-  
-  
-
+  // Case 2: Serves coffee and dessert, but not breakfast
+  else if (servesCoffee && servesDessert && !servesBreakfast) {
+    return 2; // "snacks" (coffee and dessert pair well for snacks)
+  }
+  // Case 3: Serves coffee, dessert, and breakfast
+  else if (servesCoffee && servesDessert && servesBreakfast) {
+    return 3; // "full" (comprehensive offering)
+  }
+  // Case 4: Serves coffee and breakfast, but not dessert
+  else if (servesCoffee && !servesDessert && servesBreakfast) {
+    return 3; // "full" (coffee and breakfast is substantial)
+  }
+  // Case 5: Only serves dessert
+  else if (!servesCoffee && servesDessert && !servesBreakfast) {
+    return 2; // "snacks" (dessert is similar to snack offerings)
+  }
+  // Case 6: Serves dessert and breakfast, but not coffee
+  else if (!servesCoffee && servesDessert && servesBreakfast) {
+    return 3; // "full" (dessert and breakfast combined is comprehensive)
+  }
+  // Case 7: Only serves breakfast
+  else if (!servesCoffee && !servesDessert && servesBreakfast) {
+    return 3; // "full" (breakfast alone is a substantial offering)
+  }
+  // Case 8: None of the above
+  else if (!servesCoffee && !servesDessert && !servesBreakfast) {
+    return null; // "invalid" (no offerings)
+  }
+}
 
 // Logic for encoding timing based on "weekdayDescriptions"
 function encodeTiming(currentOpeningHours) {
@@ -667,7 +656,9 @@ function encodeTiming(currentOpeningHours) {
     //console.log("Extracted array content:", arrayContent);
 
     // Step 3: Split the array into individual day entries
-    const days = arrayContent.split("',").map((day) => day.replace(/['"]/g, "").trim());
+    const days = arrayContent
+      .split("',")
+      .map((day) => day.replace(/['"]/g, "").trim());
     //console.log("Split days array:", days);
 
     // Step 4: Find the entry for Monday
@@ -684,15 +675,14 @@ function encodeTiming(currentOpeningHours) {
       console.log("Invalid time part in Monday entry");
       return 0;
     }
-    
+
     //console.log(timePart1);
-    if(timePart1[1] === " Open 24 hours"){
+    if (timePart1[1] === " Open 24 hours") {
       return 3;
     }
-    
+
     const timePart2 = timePart1[2].split("\\u202f");
     const timePart3 = timePart2[1].split("\\u");
-
 
     //console.log("Timepart2:", timePart2);
     //console.log("Timepart3:", timePart3);
@@ -702,8 +692,8 @@ function encodeTiming(currentOpeningHours) {
     //console.log(cleanedTime1);
     //console.log(cleanedTime2);
     //console.log(cleanedTime3);
-    
-    const openingTime = cleanedTime1+ cleanedTime2+ cleanedTime3;
+
+    const openingTime = cleanedTime1 + cleanedTime2 + cleanedTime3;
 
     //console.log("Extracted opening time:", openingTime);
 
@@ -715,7 +705,8 @@ function encodeTiming(currentOpeningHours) {
     // Step 6: Parse opening time to determine opening period
     //const openingHour = parseInt(openingTime.split(":")[0], 10);
     const isPM = cleanedTime3.includes("PM");
-    const normalizedHour = isPM && cleanedTime1 !== 12 ? cleanedTime1 + 12 : cleanedTime1;
+    const normalizedHour =
+      isPM && cleanedTime1 !== 12 ? cleanedTime1 + 12 : cleanedTime1;
 
     console.log("Normalized opening hour (24-hour):", normalizedHour);
 
@@ -741,27 +732,29 @@ function encodeTiming(currentOpeningHours) {
   }
 }
 
-
 // Logic for encoding accessibility
-function encodeAccessibility(paymentOptions, accessibilityOptions, parkingOptions) {
+function encodeAccessibility(
+  paymentOptions,
+  accessibilityOptions,
+  parkingOptions
+) {
   const arr = [parkingOptions, paymentOptions, accessibilityOptions];
   const result = getStringWithHighestTrue(arr);
   console.log(result);
-  if (result.includes("accepts")){
-    return 3 ;
-  }
-  else if (result.includes("free") || result.includes("valet") || result.includes("paid")){
-    return 1 ;
-  }
-  else if (result.includes("wheelchair")){
-    return 2 ;
-  }
-  else{
+  if (result.includes("accepts")) {
+    return 3;
+  } else if (
+    result.includes("free") ||
+    result.includes("valet") ||
+    result.includes("paid")
+  ) {
+    return 1;
+  } else if (result.includes("wheelchair")) {
+    return 2;
+  } else {
     return Math.floor(Math.random() * 3) + 1;
   }
-  
 }
-
 
 function getStringWithHighestTrue(strings) {
   //console.log(typeof strings);
@@ -784,16 +777,11 @@ function countTrueOccurrences(inputString) {
   return matches ? matches.length : 0; // Return count or 0 if none
 }
 
-
-
-
-
 function cosineSimilarity(vec1, vec2) {
   const dotProduct = vec1.reduce((sum, val, i) => sum + val * vec2[i], 0);
   const magnitude1 = Math.sqrt(vec1.reduce((sum, val) => sum + val ** 2, 0));
   const magnitude2 = Math.sqrt(vec2.reduce((sum, val) => sum + val ** 2, 0));
   return dotProduct / (magnitude1 * magnitude2);
-
 }
 
 function findBestMatch(userVector, shopVectors, coffeeShops, topN = 5) {
@@ -823,5 +811,3 @@ function findBestMatch(userVector, shopVectors, coffeeShops, topN = 5) {
   console.log("Top Matches:", topMatches);
   return topMatches;
 }
-
-

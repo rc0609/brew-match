@@ -1,4 +1,6 @@
-const apiKey = "AIzaSyDxYbXeIc-rgRwoRY_QnJJ17O8JdVgUO5E";
+import config from "./config.js";
+const apiKey = config.googlePlaces.apiKey;
+const outscraperApiKey = config.outscraper.apiKey;
 
 const options = {
   enableHighAccuracy: true,
@@ -556,8 +558,7 @@ function success(pos) {
         )}&limit=1&async=false`,
         {
           headers: {
-            "X-API-KEY":
-              "NmQ1NjA3NjE2Yjc1NDFjYWIwMzg4N2IzNzhhMDMwNTl8YjQzNzI5YjY1MA",
+            "X-API-KEY": outscraperApiKey,
           },
         }
       );

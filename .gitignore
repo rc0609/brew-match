@@ -166,3 +166,4 @@ cython_debug/
 coffee_shops.csv
 package-lock.json
 package.json
+/config.js

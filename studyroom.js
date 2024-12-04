@@ -31,15 +31,8 @@ import {
   serverTimestamp as rtdbTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBQIoG1AKHFRkJv7VZ6Z39ob-Fm8lYYo5w",
-  authDomain: "brew-match.firebaseapp.com",
-  projectId: "brew-match",
-  storageBucket: "brew-match.appspot.com",
-  messagingSenderId: "871621577528",
-  appId: "1:871621577528:web:d8af0d672974024d954fcd",
-  measurementId: "G-Y6YQ6NBFMX",
-};
+import config from "./config.js";
+const firebaseConfig = config.firebase;
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
