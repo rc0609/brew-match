@@ -6,21 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>CoffeeApp - Profile</title>
-
-    <!-- Firebase SDKs -->
     <script type="module" src="profile.js"></script>
-
-    <!-- Optional: Include your CSS -->
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="profileStyles.css" />
   </head>
   <body>
     <div class="profile-container">
-      <h2>User Profile</h2>
-      <p><strong>Name:</strong> <span id="username">Loading...</span></p>
-      <p><strong>Email:</strong> <span id="email">Loading...</span></p>
-      <!-- Add more user-specific fields as needed -->
+      <div class="img-container">
+        <a href="homepage.html">
+          <img id="logo" src="/img/Brew_Match_2.png" />
+        </a>
+      </div>
+      <div id="user-info-container">
+        <h2>User Profile</h2>
+        <p><strong>Name:</strong> <span id="username">Loading...</span></p>
+        <p><strong>Email:</strong> <span id="email">Loading...</span></p>
 
-      <button id="logout">Logout</button>
+        <button id="logout">Logout</button>
+      </div>
 
       <p id="profile-message" class="message hidden"></p>
     </div>
