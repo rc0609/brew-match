@@ -273,6 +273,18 @@ body {
   z-index: 1000;
 }
 
+#output {
+  padding-top: 1px; 
+  margin: 20px auto;
+  max-width: 600px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #e4c1c1;
+  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)
+}
+
+
 .loading-text {
   text-align: center;
   margin-top: 10px;
@@ -313,6 +325,8 @@ body {
   color: #593B3D;
   font-size: 1.1em;
 }
+
+
 
 @keyframes spin {
   0% {

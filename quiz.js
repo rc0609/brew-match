@@ -421,7 +421,8 @@ async function saveQuizResults() {
 
       // Continue with the next step: encode features
       const encodedShops = processCoffeeShops(coffeeShops);
-      findBestMatch(numericalVector, encodedShops, coffeeShops);
+      const array = findBestMatch(numericalVector, encodedShops, coffeeShops);
+      displayMatches(array);
       }
     });
     
@@ -444,16 +445,41 @@ async function saveQuizResults() {
   }
 }
 
-function showResults() {
-  const quizContainer = document.getElementById("quiz-container");
-  quizContainer.innerHTML = `
-        <div class="results-container">
-            <h2>Thanks for completing the quiz!</h2>
-            <p>Your preferences have been saved. Redirecting you to the map...</p>
-            <div class="loading-spinner"></div>
-        </div>
-    `;
+// Function to display top matches
+function displayMatches(topMatch) {
+
+  document.getElementById('output').innerHTML = '<h2>Recommended Coffee Shops</h2>'
+
+  topMatch.forEach((match) => {  
+    document.getElementById('output').innerHTML += `<p>${match.coffeeShop.name}</p>`;
+  });
+
+
+ /* console.log('Top Matches:', topMatch); // Debug log
+  const recommendationsContainer = document.getElementById('recommendations-container');
+  const recommendationsList = document.getElementById('recommendations-list');
+  console.log('Recommendations Container:', recommendationsContainer); // Debug log
+  console.log('Recommendations List:', recommendationsList); // Debug log
+
+  // Clear existing content
+  recommendationsList.innerHTML = '';
+
+  // Show the container
+  recommendationsContainer.classList.remove('hidden');
+
+  if (topMatch.length === 0) {
+    recommendationsContainer.innerHTML = '<p>No matches found. Please try again!</p>';
+    return;
+  }
+
+  // Iterate through the top matches and generate HTML
+  topMatch.forEach((match) => {
+    console.log(match.coffeeShop.name);
+    recommendationsContainer.innerHTML = '<h3>${match.coffeeShop.name}</h3>';
+  });*/
 }
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM Content Loaded, initializing quiz");
