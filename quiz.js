@@ -627,7 +627,7 @@ function encodeTiming(currentOpeningHours) {
 
     // Extract the substring starting from `weekdayDescriptions`
     const substring = currentOpeningHours.slice(startIndex);
-    console.log("Extracted substring starting with weekdayDescriptions:", substring);
+    //console.log("Extracted substring starting with weekdayDescriptions:", substring);
 
     // Step 2: Extract the array content
     const arrayStartIndex = substring.indexOf("[");
@@ -638,32 +638,48 @@ function encodeTiming(currentOpeningHours) {
     }
 
     const arrayContent = substring.slice(arrayStartIndex + 1, arrayEndIndex);
-    console.log("Extracted array content:", arrayContent);
+    //console.log("Extracted array content:", arrayContent);
 
     // Step 3: Split the array into individual day entries
     const days = arrayContent.split("',").map((day) => day.replace(/['"]/g, "").trim());
-    console.log("Split days array:", days);
+    //console.log("Split days array:", days);
 
     // Step 4: Find the entry for Monday
     const mondayEntry = days.find((day) => day.startsWith("Monday:"));
-    console.log("Monday entry:", mondayEntry);
+    //console.log("Monday entry:", mondayEntry);
     if (!mondayEntry) {
       console.log("Monday not found");
       return 0;
     }
 
     // Step 5: Extract the first number after the colon
-    const timePart = mondayEntry.split(":")[1]; // Get the part after the first colon
-    if (!timePart) {
+    const timePart1 = mondayEntry.split(":"); // Get the part after the first colon
+    if (!timePart1) {
       console.log("Invalid time part in Monday entry");
       return 0;
     }
+    
+    //console.log(timePart1);
+    if(timePart1[1] === " Open 24 hours"){
+      return 3;
+    }
+    
+    const timePart2 = timePart1[2].split("\\u202f");
+    const timePart3 = timePart2[1].split("\\u");
 
-    const cleanedTime = timePart.replace(/\\u202f/g, ""); // Remove any garbage characters
-    const [timeString] = cleanedTime.split("â€“").map((time) => time.trim());
-    const openingTime = timeString.match(/\d+:\d+\s*(AM|PM)/i)?.[0]; // Extract the time with AM/PM
 
-    console.log("Extracted opening time:", openingTime);
+    //console.log("Timepart2:", timePart2);
+    //console.log("Timepart3:", timePart3);
+    const cleanedTime1 = timePart1[1];
+    const cleanedTime2 = timePart2[0];
+    const cleanedTime3 = timePart3[0];
+    //console.log(cleanedTime1);
+    //console.log(cleanedTime2);
+    //console.log(cleanedTime3);
+    
+    const openingTime = cleanedTime1+ cleanedTime2+ cleanedTime3;
+
+    //console.log("Extracted opening time:", openingTime);
 
     if (!openingTime) {
       console.log("Invalid opening time");
@@ -671,18 +687,18 @@ function encodeTiming(currentOpeningHours) {
     }
 
     // Step 6: Parse opening time to determine opening period
-    const openingHour = parseInt(openingTime.split(":")[0], 10);
-    const isPM = openingTime.includes("PM");
-    const normalizedHour = isPM && openingHour !== 12 ? openingHour + 12 : openingHour;
+    //const openingHour = parseInt(openingTime.split(":")[0], 10);
+    const isPM = cleanedTime3.includes("PM");
+    const normalizedHour = isPM && cleanedTime1 !== 12 ? cleanedTime1 + 12 : cleanedTime1;
 
     console.log("Normalized opening hour (24-hour):", normalizedHour);
 
     // Step 7: Apply logic to determine index based on opening period
-    if (normalizedHour < 9) {
+    if (normalizedHour <= 9) {
       console.log("Returning 1 (morning)");
       return 1;
     }
-    if (normalizedHour >= 11 && normalizedHour < 17) {
+    if (normalizedHour >= 10 && normalizedHour < 17) {
       console.log("Returning 2 (daytime)");
       return 2;
     }
@@ -702,36 +718,48 @@ function encodeTiming(currentOpeningHours) {
 
 // Logic for encoding accessibility
 function encodeAccessibility(paymentOptions, accessibilityOptions, parkingOptions) {
-  // Check paymentOptions
-  if (paymentOptions && Object.keys(paymentOptions).length > 0) {
-    if (paymentOptions.acceptsCashOnly === true) {
-      return 0; // Move to next column
-    }
-    if (paymentOptions.acceptsCreditCards || paymentOptions.acceptsDebitCards) {
-      return 3; // Index 2 if credit/debit cards are accepted
-    }
+  const arr = [parkingOptions, paymentOptions, accessibilityOptions];
+  const result = getStringWithHighestTrue(arr);
+  console.log(result);
+  if (result.includes("accepts")){
+    return 3 ;
   }
-
-  // Check accessibilityOptions
-  if (accessibilityOptions && Object.keys(accessibilityOptions).length > 0) {
-    const values = Object.values(accessibilityOptions);
-    const trueCount = values.filter((val) => val === true).length;
-    if (trueCount >= 2) {
-      return 2; // Index 1 if two or more fields are true
-    }
+  else if (result.includes("free") || result.includes("valet") || result.includes("paid")){
+    return 1 ;
   }
-
-  // Check parkingOptions
-  if (parkingOptions && Object.keys(parkingOptions).length > 0) {
-    const hasTrueValue = Object.values(parkingOptions).some((val) => val === true);
-    if (hasTrueValue) {
-      return 1; // Index 0 if any parking option is true
-    }
+  else if (result.includes("wheelchair")){
+    return 2 ;
   }
-
-  // Default case
-  return 0; // No valid data found
+  else{
+    return Math.floor(Math.random() * 3) + 1;
+  }
+  
 }
+
+
+function getStringWithHighestTrue(strings) {
+  //console.log(typeof strings);
+  let maxCount = 0;
+  let stringWithMaxTrue = " ";
+
+  for (const str of strings) {
+    const count = countTrueOccurrences(str);
+    if (count > maxCount) {
+      maxCount = count;
+      stringWithMaxTrue = str;
+    }
+  }
+
+  return stringWithMaxTrue;
+}
+
+function countTrueOccurrences(inputString) {
+  const matches = inputString.match(/True/g); // Match all "True"
+  return matches ? matches.length : 0; // Return count or 0 if none
+}
+
+
+
 
 
 function cosineSimilarity(vec1, vec2) {
@@ -742,21 +770,32 @@ function cosineSimilarity(vec1, vec2) {
 
 }
 
-function findBestMatch(userVector, shopVectors, coffeeShops) {
-  let bestMatch = null;
-  let bestScore = -1;
+function findBestMatch(userVector, shopVectors, coffeeShops, topN = 5) {
+  // Array to store similarity scores and their corresponding coffee shops
+  const matches = [];
 
   shopVectors.forEach((shopVector, index) => {
     console.log(coffeeShops[index].name, shopVector, coffeeShops[index].id);
+
+    // Calculate similarity
     const similarity = cosineSimilarity(userVector, shopVector);
     console.log(`Similarity with ${coffeeShops[index].name}:`, similarity);
 
-    if (similarity > bestScore) {
-      bestScore = similarity;
-      bestMatch = coffeeShops[index];
-    }
+    // Add the shop and its similarity score to the matches array
+    matches.push({
+      coffeeShop: coffeeShops[index],
+      similarity,
+    });
   });
 
-  console.log("Best Match:", bestMatch);
+  // Sort the matches by similarity score in descending order
+  matches.sort((a, b) => b.similarity - a.similarity);
+
+  // Select the top N matches
+  const topMatches = matches.slice(0, topN);
+
+  console.log("Top Matches:", topMatches);
+  return topMatches;
 }
+
 
