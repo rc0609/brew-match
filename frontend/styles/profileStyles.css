@@ -11,7 +11,7 @@ body {
       rgba(0, 0, 0, 0.5),
       rgba(0, 0, 0, 0.5)
     ),
-    /* bottom, image */ url("img/coffee.jpg");
+    /* bottom, image */ url("../img/coffee.jpg");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;

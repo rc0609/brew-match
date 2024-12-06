@@ -11,7 +11,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 // Your web app's Firebase configuration (ensure this matches your firebase-config.js)
-import config from "./config.js";
+import config from "../../config/config.js";
 const firebaseConfig = config.firebase;
 
 // Initialize Firebase
@@ -70,7 +70,7 @@ async function handleLogout() {
     displayMessage("Logged out successfully!", "profile-message");
     // Redirect to login page after a short delay
     setTimeout(() => {
-      window.location.href = "index.html";
+      window.location.href = "../../index.html";
     }, 1500);
   } catch (error) {
     console.error("Error during logout:", error);
@@ -92,7 +92,7 @@ onAuthStateChanged(auth, (user) => {
     fetchAndDisplayUserData(user);
   } else {
     // No user is signed in, redirect to login page
-    window.location.href = "index.html";
+    window.location.href = "../../index.html";
   }
 });
 

@@ -8,24 +8,23 @@ body {
   margin: 0;
   background: none;
   overflow: hidden;
-  position: relative; 
+  position: relative;
 }
 
 body::before {
-  content: ""; 
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-    url("img/coffee.jpg");
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url("../img/coffee.jpg");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  filter: blur(3px); 
-  z-index: 0; 
+  filter: blur(3px);
+  z-index: 0;
 }
 
 h2 {
@@ -38,7 +37,7 @@ p {
 }
 
 #container {
-  position: relative; 
+  position: relative;
   z-index: 2;
   width: 48rem;
   height: auto;
@@ -49,15 +48,16 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: none; 
+  background: none;
 }
 
-h2, p, button {
+h2,
+p,
+button {
   position: relative;
-  z-index: 2; 
-  color: white; 
+  z-index: 2;
+  color: white;
 }
-
 
 .img-container {
   display: flex;
@@ -124,9 +124,9 @@ button {
 }
 
 button {
-  background-color: #FFFFFF;
-  color: #593D3B;
-  border: 1px solid #C3A995;
+  background-color: #ffffff;
+  color: #593d3b;
+  border: 1px solid #c3a995;
   border-radius: 15px;
   width: 7rem;
   height: 3rem;
@@ -135,13 +135,13 @@ button {
   padding: 7px;
   cursor: pointer;
   text-align: center;
-  margin-top: 40px; 
+  margin-top: 40px;
   transition: background-color 0.3s, color 0.3s;
   margin: 0.5rem 0.3rem;
 }
 
 button:hover {
-  background-color: #C3A995;
+  background-color: #c3a995;
   transition-duration: 500ms;
 }
 
@@ -152,7 +152,7 @@ button:active {
 .button-container {
   display: flex;
   justify-content: center;
-  margin: 0.5rem 0;;
+  margin: 0.5rem 0;
 }
 
 .switch-container {
@@ -164,7 +164,6 @@ button:active {
 .hidden {
   display: none;
 }
-
 
 .message {
   background-color: rgb(198, 255, 222);
@@ -178,6 +177,6 @@ button:active {
 }
 
 #guest-signin-button p:hover {
-  color: #593D3B; 
+  color: #593d3b;
   transition-duration: 300ms;
 }

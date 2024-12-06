@@ -31,7 +31,7 @@ import {
   serverTimestamp as rtdbTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 
-import config from "./config.js";
+import config from "../../config/config.js";
 const firebaseConfig = config.firebase;
 
 const app = initializeApp(firebaseConfig);

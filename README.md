@@ -1,4 +1,4 @@
-![Logo](img/brew-match-logo-black.png)
+![Logo](frontend/img/brew-match-logo-black.png)
 
 # BrewMatch
 
@@ -106,16 +106,27 @@ export default config;
 ### 1. Backend Setup
 
 ```bash
-# Create and activate virtual environment
+# Create and activate virtual environment from root folder
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Mac/Linux
+venv\Scripts\activate     # On Windows
 
 # Install dependencies
 pip install fastapi uvicorn pydantic pymongo python-dotenv
 
+# Navigate to backend folder
+cd backend
+
 # Start the backend server
 uvicorn main:app --reload
 ```
+
+**Important Notes:**
+
+- You must run the server from inside the backend folder
+- The server will run on http://127.0.0.1:8000
+- The generated coffee_shops.csv file will be created in the root directory
+- Keep the server running while using the quiz feature
 
 ### 2. Frontend Setup
 
@@ -136,13 +147,6 @@ live-server
 - User profile management
 - Session management
 
-### Coffee Shop Quiz
-
-- Personalized recommendations
-- Location-based matching
-- Preference analysis
-- Real-time results
-
 ### Study Rooms
 
 - Real-time collaboration
@@ -156,6 +160,57 @@ live-server
 - Real-time popularity data
 - Advanced filtering
 - Detailed coffee shop profiles
+
+### Coffee Shop Quiz
+
+#### Important: Backend Server Requirement
+
+⚠️ **The quiz requires the backend server to be running to work properly!**
+
+Before using the quiz:
+
+1. Start the backend server first:
+
+```bash
+# Navigate to backend folder
+cd backend
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+
+# Start server
+uvicorn main:app --reload
+```
+
+2. Wait for the server to generate the `coffee_shops.csv` file
+3. Ensure MongoDB is connected
+4. Then start the frontend server and use the quiz
+
+#### How the Quiz Works
+
+1. **Location Services**:
+
+   - Requires browser location access
+   - Finds coffee shops within 1.5km of your location
+
+2. **Data Collection**:
+
+   - Backend server collects coffee shop data from Google Places API
+   - Stores data in MongoDB
+   - Generates `coffee_shops.csv` for recommendation system
+
+3. **Quiz Flow**:
+   - Collects user preferences:
+     - Price range
+     - Atmosphere preferences
+     - Food importance
+     - Timing preferences
+     - Accessibility needs
+   - Matches preferences with local coffee shops
+   - Provides personalized recommendations
 
 ---
 

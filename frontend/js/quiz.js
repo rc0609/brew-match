@@ -9,7 +9,7 @@ import {
   setDoc,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
-import config from "./config.js";
+import config from "../../config/config.js";
 const apiKey = config.googlePlaces.apiKey;
 
 const firebaseConfig = config.firebase;
@@ -400,7 +400,7 @@ async function saveQuizResults() {
     console.log("Encoded Vector:", numericalVector);
 
     // CSV file path
-    const csvFilePath = "coffee_shops.csv";
+    const csvFilePath = "../../coffee_shops.csv";
 
     // Parse CSV file
     Papa.parse(csvFilePath, {

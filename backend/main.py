@@ -37,6 +37,7 @@ app.add_middleware(
 )
 
 load_dotenv()
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 MONGO_URI = os.getenv("MONGO_URI")
 if not MONGO_URI:
@@ -53,7 +54,7 @@ class StoreRequest(BaseModel):
 
 
 async def ensure_csv_exists():
-    csv_file = 'coffee_shops.csv'
+    csv_file = os.path.join(ROOT_DIR, 'coffee_shops.csv')
     if not os.path.exists(csv_file):
         logger.info("CSV file not found. Creating from database entries...")
 
@@ -163,7 +164,7 @@ async def store_coffee_shops(request: StoreRequest):
     }
 
 async def append_to_csv(document):
-    csv_file = 'coffee_shops.csv'
+    csv_file = os.path.join(ROOT_DIR, 'coffee_shops.csv')
 
     exists = False
     rows = []
@@ -247,7 +248,7 @@ def watch_coffee_shops_sync():
 
 
 async def initial_export():
-    csv_file = 'coffee_shops.csv'
+    csv_file = os.path.join(ROOT_DIR, 'coffee_shops.csv')
 
     unique_shops = list(collection.find())
     unique_ids = set()

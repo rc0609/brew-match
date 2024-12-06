@@ -17,7 +17,7 @@ import {
   setDoc,
   doc,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-import config from "./config.js";
+import config from "../../config/config.js";
 const firebaseConfig = config.firebase;
 // TODO: Add SDKs for Firebase products that you want to use
 
@@ -91,7 +91,7 @@ signIn.addEventListener("click", (event) => {
       displayMessage("Login Successfully", "login-message");
       const user = userCredential.user;
       localStorage.setItem("loggedInUserId", user.uid);
-      window.location.href = "homepage.html";
+      window.location.href = "/frontend/pages/homepage.html";
     })
     .catch((error) => {
       const errorCode = error.code;
@@ -130,7 +130,7 @@ guestSignInButton.addEventListener("click", (event) => {
       );
     })
     .then(() => {
-      window.location.href = "homepage.html";
+      window.location.href = "/frontend/pages/homepage.html";
     })
     .catch((error) => {
       const errorCode = error.code;
