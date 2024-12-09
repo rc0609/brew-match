@@ -4,9 +4,6 @@
 
 A coffee shop directory that matches users with coffee shops based on their preferences and lifestyle.
 
-We have officially deployed our website!
-https://brew-match.web.app/
-
 ## Table of Contents
 
 - [About The Project](#about-the-project)
