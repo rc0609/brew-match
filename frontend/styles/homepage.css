@@ -36,28 +36,6 @@
   color: #a3b18a; /* Optional hover color */
 }
 
-.search-box {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-.search-box input {
-  width: 110px;
-  height: 18px;
-  padding: 5px;
-  border: solid #593d3b;
-  border-radius: 20px;
-  margin-top: 2px;
-}
-
-.search-box i {
-  display: flex;
-  justify-content: flex-end;
-  margin-left: 10px;
-  margin-top: 2px;
-}
-
 .intro {
   height: 700px;
   background-image: url("../img/coffee.jpg");
@@ -347,7 +325,6 @@
   width: 200px;
   margin-left: -70px;
   position: relative;
-  filter: blur(2px);
 }
 
 #circle2 {
@@ -356,7 +333,6 @@
   height: 250px;
   width: 250px;
   margin-top: -150px;
-  filter: blur(2px);
 }
 
 .study-room-paragraphs {

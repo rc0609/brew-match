@@ -502,8 +502,6 @@ body {
   justify-content: space-between;
   align-items: center;
   background: #ffffff;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header .logo img {
@@ -513,18 +511,18 @@ body {
 }
 
 .navigation-bar {
+  padding: 8px;
   display: flex;
-  align-items: center;
-  gap: 2rem;
+  width: 30%;
+  justify-content: space-around;
 }
 
 .navigation-bar a {
   color: #593d3b;
-  transition: color 0.3s;
 }
 
 .navigation-bar a:hover {
-  color: #a3b18a;
+  color: #a3b18a; /* Optional hover color */
 }
 
 .places-container {

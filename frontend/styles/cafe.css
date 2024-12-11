@@ -40,28 +40,6 @@ body {
   color: #a3b18a;
 }
 
-.search-box {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-.search-box input {
-  width: 110px;
-  height: 18px;
-  padding: 5px;
-  border: solid #593d3b;
-  border-radius: 20px;
-  margin-top: 2px;
-}
-
-.search-box i {
-  display: flex;
-  justify-content: flex-end;
-  margin-left: 10px;
-  margin-top: 2px;
-}
-
 .intro {
   height: 250px;
   background-image: url("../img/subpage-banner.jpg");
