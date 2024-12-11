@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BREW Match Homepage</title>
+    <title>Homepage | BrewMatch</title>
     <link rel="stylesheet" href="../styles/homepage.css" />
     <link
       rel="stylesheet"
@@ -19,6 +19,7 @@
       <!--logo close-->
       <nav class="navigation-bar">
         <a href="../pages/quiz.html">Quiz</a>
+        <a href="../pages/studyroom.html">Study Room</a>
         <a href="../pages/profile.html">Profiles</a>
         <a href="../pages/about.html">About</a>
         <!--search-box close-->
@@ -147,11 +148,9 @@
       <div class="footer-navigation">
         <div class="footer-navigation-text">
           <div class="footer-logo">
-            <img
-              src="../img/brew-match-logo-black.png"
-              alt="Brew Match logo Footer"
-              style="width: 170px; height: auto"
-            />
+            <a href="#top" id="footer-logo" class="logo">
+              <img src="../img/brew-match-logo-black.png" alt="Brew Match logo" style="width: 170px; height: auto"/>
+            </a>
           </div>
           <!--footer-logo close-->
         </div>
@@ -162,5 +161,14 @@
       <!--outro close-->
     </footer>
     <!--footer close-->
+    <script>
+      document.getElementById("footer-logo").addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent the default anchor behavior
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth", // Smooth scrolling
+        });
+      });
+    </script>
   </body>
 </html>
