@@ -76,7 +76,7 @@ OUTSCRAPER_API_KEY=your_outscraper_api_key
 
 ### 2. Firebase Configuration
 
-Create a `config.js` file in the root directory:
+Create a `config.js` file in the `config` folder:
 
 ```javascript
 const config = {
@@ -84,11 +84,11 @@ const config = {
     apiKey: "your_firebase_api_key",
     authDomain: "your_project.firebaseapp.com",
     projectId: "your_project_id",
-    storageBucket: "your_project.appspot.com",
+    storageBucket: "your_project.firebasestorage.app",
     messagingSenderId: "your_messaging_sender_id",
     appId: "your_app_id",
     measurementId: "your_measurement_id",
-    databaseURL: "your_database_url",
+    databaseURL: "your_database_url", //Your Firebase Realtime Database URL
   },
   googlePlaces: {
     apiKey: "your_google_places_api_key",
@@ -130,12 +130,15 @@ uvicorn main:app --reload
 
 ### 2. Frontend Setup
 
-```bash
-# Install live-server globally
-npm install -g live-server
+1. Install the "Live Server" extension in VS Code through the Extensions Marketplace
+2. Configure Live Server settings:
 
-# Start the frontend server
-live-server
+- Press Ctrl+Shift+P (Windows) or Cmd+Shift+P (Mac) to open the Command Palette
+- Type "settings.json" and select "Preferences: Open User Settings (JSON)"
+- Add:
+
+```json
+"liveServer.settings.ignoreFiles": [".vscode/**", "**/coffee_shops.csv"]
 ```
 
 ## Features
