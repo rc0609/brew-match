@@ -58,6 +58,12 @@ window.onbeforeunload = function (e) {
   }
 };
 
+let initialState = {
+  places: [],
+  center: null,
+  zoom: 14,
+};
+
 function getEmojiRating(rating) {
   const fullStar = "⭐";
   const emptyStar = "☆";
@@ -74,16 +80,94 @@ function getEmojiRating(rating) {
   );
 }
 
+let debounceTimeout = null;
+
 function success(pos) {
   const crd = pos.coords;
-  console.log("Your current position is:");
-  console.log(`Latitude : ${crd.latitude}`);
-  console.log(`Longitude: ${crd.longitude}`);
-  console.log(`More or less ${crd.accuracy} meters.`);
-  console.log(pos.coords.latitude);
-
+  initialState.center = { lat: crd.latitude, lng: crd.longitude };
   let map;
   let markers = [];
+
+  function initializeResetButton() {
+    const resetButton = document.getElementById("reset-map");
+    resetButton.addEventListener("click", resetMapToInitialState);
+  }
+
+  function resetMapToInitialState() {
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    map.setCenter(initialState.center);
+    map.setZoom(initialState.zoom);
+
+    document.getElementById("filter-chains").checked = false;
+    document.getElementById("filter-rating").value = "0";
+    document.getElementById("filter-price").value = "all";
+    document.getElementById("filter-open").checked = false;
+    document.getElementById("filter-dine-in").checked = false;
+    document.getElementById("filter-takeout").checked = false;
+    document.getElementById("filter-delivery").checked = false;
+    document.getElementById("filter-breakfast").checked = false;
+    document.getElementById("filter-dessert").checked = false;
+    document.getElementById("filter-credit-cards").checked = false;
+    document.getElementById("filter-nfc").checked = false;
+
+    hideChains = false;
+    minimumRating = 0;
+    selectedPriceLevel = "all";
+    showOpenOnly = false;
+    selectedServices = {
+      dineIn: false,
+      takeout: false,
+      delivery: false,
+    };
+    selectedFoodOptions = {
+      breakfast: false,
+      dessert: false,
+    };
+    selectedPaymentOptions = {
+      creditCards: false,
+      nfc: false,
+    };
+
+    const searchInput = document.getElementById("search-input");
+    searchInput.value = "";
+
+    const oldSearchInput = searchInput;
+    const newSearchInput = oldSearchInput.cloneNode(true);
+    oldSearchInput.parentNode.replaceChild(newSearchInput, oldSearchInput);
+
+    newSearchInput.addEventListener("input", function (e) {
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+
+      debounceTimeout = setTimeout(() => {
+        const searchTerm = this.value.trim().toLowerCase();
+        if (searchTerm.length > 0) {
+          fetchPlacesWithSearch(searchTerm);
+        } else {
+          let filteredPlaces = [...allPlaces];
+          if (hideChains) {
+            filteredPlaces = filteredPlaces.filter((place) => {
+              const placeName = place.displayName.text.toLowerCase();
+              return !CHAIN_STORES.some((chain) => placeName.includes(chain));
+            });
+          }
+          displayPlaces(filteredPlaces);
+        }
+      }, 300);
+    });
+
+    allPlaces = [...initialState.places];
+    displayPlaces(allPlaces);
+
+    const dropdown = document.querySelector(".dropdown");
+    if (dropdown.classList.contains("active")) {
+      dropdown.classList.remove("active");
+    }
+  }
 
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
@@ -127,7 +211,6 @@ function success(pos) {
       filterAndDisplayPlaces();
     });
 
-    let debounceTimeout = null;
     searchInput.addEventListener("input", function (e) {
       if (!hasSearched) {
         hasSearched = true;
@@ -479,15 +562,17 @@ function success(pos) {
     }
   };
 
-  async function initialize() {
+  function initialize() {
     try {
       initMap();
-      const success = await fetchNearbyPlaces();
-
-      if (success) {
-        initializeSearch();
-        initializeFilters();
-      }
+      fetchNearbyPlaces().then((success) => {
+        if (success) {
+          initialState.places = [...allPlaces];
+          initializeSearch();
+          initializeFilters();
+          initializeResetButton();
+        }
+      });
     } catch (error) {
       console.error("Initialization error:", error);
       displayError("Failed to initialize the application.");

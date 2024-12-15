@@ -99,6 +99,8 @@ body {
 
 .filter-buttons {
   margin-top: 10px;
+  display: flex;
+  align-items: center;
 }
 
 .filter-btn {
@@ -534,6 +536,26 @@ body {
 
 .places-container::-webkit-scrollbar {
   display: none;
+}
+
+.reset-btn {
+  padding: 9px 16px 12px 16px;
+  background-color: #fff;
+  border: 2px solid #4285f4;
+  border-radius: 6px;
+  color: #4285f4;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.reset-btn:hover {
+  background-color: #4285f4;
+  color: #fff;
+}
+
+.reset-btn:active {
+  transform: scale(0.98);
 }
 
 @keyframes spin {
