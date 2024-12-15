@@ -10,6 +10,7 @@ import {
   signInWithEmailAndPassword,
   signInAnonymously,
   onAuthStateChanged,
+  sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 import {
@@ -146,4 +147,52 @@ guestSignInButton.addEventListener("click", (event) => {
       const errorMessage = error.message;
       displayMessage(`Error: ${errorMessage}`, "guest-signin-message", true);
     });
+});
+
+const resetModal = document.getElementById("reset-password-modal");
+const forgotPasswordLink = document.getElementById("forgot-password-link");
+const closeModalBtn = document.querySelector(".close");
+const sendResetLinkBtn = document.getElementById("send-reset-link");
+
+forgotPasswordLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  resetModal.classList.add("show");
+  document.getElementById("reset-email").value = "";
+  document.getElementById("reset-message").classList.add("hidden");
+});
+
+closeModalBtn.addEventListener("click", () => {
+  resetModal.classList.remove("show");
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === resetModal) {
+    resetModal.classList.remove("show");
+  }
+});
+
+sendResetLinkBtn.addEventListener("click", async () => {
+  const email = document.getElementById("reset-email").value;
+  const auth = getAuth();
+  const resetMessage = document.getElementById("reset-message");
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    displayMessage(
+      "Password reset email sent. Please check your inbox.",
+      "reset-message",
+      false
+    );
+    setTimeout(() => {
+      resetModal.classList.remove("show");
+    }, 3000);
+  } catch (error) {
+    let errorMessage = "Failed to send reset email.";
+    if (error.code === "auth/user-not-found") {
+      errorMessage = "No account found with this email address.";
+    } else if (error.code === "auth/invalid-email") {
+      errorMessage = "Please enter a valid email address.";
+    }
+    displayMessage(errorMessage, "reset-message", true);
+  }
 });

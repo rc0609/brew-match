@@ -180,3 +180,78 @@ button:active {
   color: #593d3b;
   transition-duration: 300ms;
 }
+
+.forgot-password {
+  text-align: right;
+  margin-bottom: 15px;
+}
+
+.forgot-password a {
+  color: #593d3b;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.forgot-password a:hover {
+  color: #a3b18a;
+}
+
+#send-reset-link {
+  width: 50%;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal.show {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #593d3b;
+}
+
+.close:hover {
+  color: #a3b18a;
+}
+
+.modal h2 {
+  color: #593d3b;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal p {
+  color: #666;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}

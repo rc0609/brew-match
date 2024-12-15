@@ -41,6 +41,9 @@
             <p>Password</p>
             <input type="password" id="login-password" />
           </div>
+          <div class="forgot-password">
+            <a href="#" id="forgot-password-link">Forgot Password?</a>
+        </div>
           <div class="button-container">
             <button id="login-button">Log In</button>
           </div>
@@ -51,6 +54,22 @@
             </p>
           </div>
         </div>
+
+        <div id="reset-password-modal" class="modal hidden">
+          <div class="modal-content">
+              <span class="close">&times;</span>
+              <h2>Reset Password</h2>
+              <p>Enter your email address and we'll send you a link to reset your password.</p>
+              <div class="forgot-password-input-div">
+                  <p>Email</p>
+                  <input type="email" id="reset-email" />
+              </div>
+              <div id="reset-message" class="message hidden"></div>
+              <div class="button-container">
+                  <button id="send-reset-link">Send Reset Link</button>
+              </div>
+          </div>
+      </div>
 
         <!-- Sign Up Form -->
         <div id="signup-form" class="form-container hidden">
