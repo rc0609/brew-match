@@ -53,6 +53,7 @@ class StudyRoom {
     this.pathsListener = null;
     this.MAX_BRUSH_SIZE = 50;
     this.ERASER_SCALE = 2;
+    this.resetDrawingState();
 
     document.addEventListener("DOMContentLoaded", () => {
       document.querySelector(".room-tools").classList.remove("active");
@@ -62,6 +63,23 @@ class StudyRoom {
       this.initializeEventListeners();
       this.setupVisibilityHandler();
     });
+  }
+
+  resetDrawingState() {
+    this.currentTool = "pencil";
+    if (this.ctx) {
+      this.ctx.strokeStyle =
+        document.getElementById("colorPicker").value || "#000000";
+      this.ctx.lineWidth =
+        parseInt(document.getElementById("brushSize").value) || 2;
+      this.ctx.lineCap = "round";
+      this.ctx.lineJoin = "round";
+    }
+
+    const toolSelect = document.getElementById("toolSelect");
+    if (toolSelect) {
+      toolSelect.value = "pencil";
+    }
   }
 
   initializeAuth() {
@@ -97,7 +115,7 @@ class StudyRoom {
           await this.leaveRoom();
         }
         await signOut(auth);
-        window.location.href = "index.html";
+        window.location.href = "../../index.html";
       } catch (error) {
         console.error("Error signing out:", error);
       }
@@ -141,10 +159,15 @@ class StudyRoom {
     this.resizeCanvas();
     window.addEventListener("resize", () => this.resizeCanvas());
 
-    this.ctx.strokeStyle = "#000000";
+    const colorPicker = document.getElementById("colorPicker");
+    this.ctx.strokeStyle = colorPicker.value || "#000000";
     this.ctx.lineWidth = 2;
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
+
+    this.currentTool = "pencil";
+    document.getElementById("toolSelect").value = "pencil";
+
     this.setCanvasSettings();
   }
 
@@ -176,6 +199,7 @@ class StudyRoom {
     toolSelect.addEventListener("change", (e) => {
       this.currentTool = e.target.value;
     });
+
     document.querySelectorAll(".room-btn").forEach((button) => {
       button.addEventListener("click", () =>
         this.joinRoom(button.dataset.room)
@@ -191,18 +215,17 @@ class StudyRoom {
 
     brushSize.max = this.MAX_BRUSH_SIZE;
     brushSize.addEventListener("change", (e) => {
-      const size = Math.min(parseInt(e.target.value), this.MAX_BRUSH_SIZE);
-      this.ctx.lineWidth =
-        this.currentTool === "eraser" ? size * this.ERASER_SCALE : size;
+      const baseWidth = Math.min(parseInt(e.target.value), this.MAX_BRUSH_SIZE);
+      if (this.currentTool === "eraser") {
+        this.ctx.lineWidth = baseWidth * this.ERASER_SCALE;
+      } else {
+        this.ctx.lineWidth = baseWidth;
+      }
     });
 
     colorPicker.addEventListener(
       "change",
       (e) => (this.ctx.strokeStyle = e.target.value)
-    );
-    brushSize.addEventListener(
-      "change",
-      (e) => (this.ctx.lineWidth = e.target.value)
     );
     clearBoard.addEventListener("click", () => this.clearWhiteboard());
     saveBoard.addEventListener("click", () => this.saveWhiteboard());
@@ -228,11 +251,13 @@ class StudyRoom {
         this.stopDrawing();
       }
     });
+
     this.canvas.addEventListener("touchstart", (e) => {
       e.preventDefault();
       const touch = e.touches[0];
       this.startDrawing(touch);
     });
+
     this.canvas.addEventListener("touchmove", (e) => {
       e.preventDefault();
       const touch = e.touches[0];
@@ -250,6 +275,7 @@ class StudyRoom {
         this.sendMessage();
       }
     });
+
     sendMessage.addEventListener("click", () => this.sendMessage());
   }
 
@@ -267,6 +293,7 @@ class StudyRoom {
 
     setTimeout(() => {
       this.resizeCanvas();
+      this.resetDrawingState();
     }, 0);
 
     document.querySelectorAll(".room-btn").forEach((btn) => {
@@ -295,17 +322,17 @@ class StudyRoom {
     onDisconnect(roomUserRef).remove();
 
     this.setupWhiteboardSync();
-
     this.subscribeToRoom();
   }
 
   setupWhiteboardSync() {
     console.log("Setting up whiteboard sync for room:", this.currentRoom);
-
     if (this.pathsListener) {
       this.pathsListener();
       this.pathsListener = null;
     }
+
+    this.resetDrawingState();
 
     this.pathsRef = ref(rtdb, `rooms/${this.currentRoom}/whiteboard/paths`);
 
@@ -329,6 +356,9 @@ class StudyRoom {
 
   redrawWhiteboard(pathsData) {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const currentTool = this.currentTool;
+    const currentColor = this.ctx.strokeStyle;
+    const currentWidth = this.ctx.lineWidth;
 
     const sortedPaths = Object.entries(pathsData)
       .map(([key, value]) => ({ ...value, key }))
@@ -339,7 +369,7 @@ class StudyRoom {
 
       this.ctx.beginPath();
       this.ctx.strokeStyle = path.isEraser ? "white" : path.color || "#000000";
-      this.ctx.lineWidth = path.isEraser ? 20 : path.width || 2;
+      this.ctx.lineWidth = path.width || 2;
       this.ctx.lineCap = "round";
       this.ctx.lineJoin = "round";
 
@@ -353,6 +383,11 @@ class StudyRoom {
       this.ctx.stroke();
       this.ctx.closePath();
     });
+
+    this.currentTool = currentTool;
+    this.ctx.strokeStyle = currentColor;
+    this.ctx.lineWidth = currentWidth;
+    document.getElementById("toolSelect").value = currentTool;
   }
 
   async leaveRoom() {
@@ -369,6 +404,8 @@ class StudyRoom {
       this.pathsListener = null;
     }
 
+    this.resetDrawingState();
+
     this.currentRoom = null;
     this.clearWhiteboard();
     document.getElementById("chatMessages").innerHTML = "";
@@ -378,15 +415,20 @@ class StudyRoom {
   subscribeToRoom() {
     document.getElementById("chatMessages").innerHTML = "";
 
-    const chatRef = collection(db, "rooms", this.currentRoom, "messages");
+    const processedMessages = new Set();
 
+    const chatRef = collection(db, "rooms", this.currentRoom, "messages");
     const q = query(chatRef, orderBy("timestamp", "asc"), limit(100));
 
     this.unsubscribeMessages = onSnapshot(
       q,
       (snapshot) => {
         snapshot.docChanges().forEach((change) => {
-          if (change.type === "added") {
+          if (
+            change.type === "added" &&
+            !processedMessages.has(change.doc.id)
+          ) {
+            processedMessages.add(change.doc.id);
             this.displayMessage(change.doc.data());
           }
         });
@@ -424,16 +466,19 @@ class StudyRoom {
     if (!message || !this.currentRoom) return;
 
     try {
-      const messageRef = collection(db, "rooms", this.currentRoom, "messages");
-      await addDoc(messageRef, {
+      input.value = "";
+
+      const messageData = {
         text: message,
         user_id: this.currentUser.uid,
         user_name: this.userDisplayName,
         timestamp: serverTimestamp(),
         room: this.currentRoom,
-      });
+        messageId: crypto.randomUUID(),
+      };
 
-      input.value = "";
+      const messageRef = collection(db, "rooms", this.currentRoom, "messages");
+      await addDoc(messageRef, messageData);
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Failed to send message. Please try again.");
@@ -447,11 +492,18 @@ class StudyRoom {
     }
 
     const chatMessages = document.getElementById("chatMessages");
+    const messageId =
+      message.messageId || `${message.user_id}-${message.timestamp}`;
+
+    if (document.querySelector(`[data-message-id="${messageId}"]`)) {
+      return;
+    }
 
     const messageDiv = document.createElement("div");
     messageDiv.className = `message ${
       message.user_id === this.currentUser.uid ? "sent" : "received"
     }`;
+    messageDiv.setAttribute("data-message-id", messageId);
 
     const sanitizedText = message.text
       .replace(/&/g, "&amp;")
@@ -480,13 +532,12 @@ class StudyRoom {
     this.ctx.beginPath();
     this.ctx.moveTo(pos.x, pos.y);
 
+    const baseWidth = parseInt(document.getElementById("brushSize").value);
     if (this.currentTool === "eraser") {
       this.ctx.strokeStyle = "white";
-      const baseWidth = Math.min(
-        parseInt(document.getElementById("brushSize").value),
-        this.MAX_BRUSH_SIZE
-      );
       this.ctx.lineWidth = baseWidth * this.ERASER_SCALE;
+    } else {
+      this.ctx.lineWidth = baseWidth;
     }
   }
 
@@ -496,16 +547,10 @@ class StudyRoom {
     const pos = this.getCanvasPosition(e);
     this.currentPath.push(pos);
 
+    const baseWidth = parseInt(document.getElementById("brushSize").value);
     if (this.currentTool === "eraser") {
       this.ctx.strokeStyle = "white";
-      const baseWidth = Math.min(
-        parseInt(document.getElementById("brushSize").value),
-        this.MAX_BRUSH_SIZE
-      );
       this.ctx.lineWidth = baseWidth * this.ERASER_SCALE;
-
-      this.ctx.lineCap = "round";
-      this.ctx.lineJoin = "round";
     }
 
     this.ctx.lineTo(pos.x, pos.y);
@@ -520,10 +565,7 @@ class StudyRoom {
 
     if (this.currentPath.length > 1) {
       try {
-        const baseWidth = Math.min(
-          parseInt(document.getElementById("brushSize").value),
-          this.MAX_BRUSH_SIZE
-        );
+        const baseWidth = parseInt(document.getElementById("brushSize").value);
         const newPathRef = push(this.pathsRef);
         await set(newPathRef, {
           points: this.currentPath,
@@ -545,10 +587,8 @@ class StudyRoom {
 
     if (this.currentTool === "eraser") {
       this.ctx.strokeStyle = document.getElementById("colorPicker").value;
-      this.ctx.lineWidth = Math.min(
-        parseInt(document.getElementById("brushSize").value),
-        this.MAX_BRUSH_SIZE
-      );
+      const baseWidth = parseInt(document.getElementById("brushSize").value);
+      this.ctx.lineWidth = baseWidth;
     }
 
     this.currentPath = [];
