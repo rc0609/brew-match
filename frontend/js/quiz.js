@@ -42,21 +42,6 @@ const geolocationOptions = {
   maximumAge: 0,
 };
 
-function getEmojiRating(rating) {
-  const fullStar = "⭐";
-  const emptyStar = "☆";
-  const roundedRating = Math.round(rating * 2) / 2;
-  const fullStars = Math.floor(roundedRating);
-  const halfStar = roundedRating - fullStars === 0.5 ? 1 : 0;
-  const emptyStars = 5 - fullStars - halfStar;
-
-  return (
-    fullStar.repeat(fullStars) +
-    (halfStar ? "⭐️" : "") +
-    emptyStar.repeat(emptyStars)
-  );
-}
-
 const quizQuestions = [
   {
     id: "pricePreference",
@@ -188,7 +173,7 @@ const sendCoffeeShopsToBackend = async (places) => {
   try {
     console.log("Sending request to backend");
     const response = await fetch(
-      "http://127.0.0.1:8000/api/store-coffee-shops/",
+      "https://brew-match-production.up.railway.app/api/store-coffee-shops/",
       {
         method: "POST",
         headers: {
@@ -211,6 +196,21 @@ const sendCoffeeShopsToBackend = async (places) => {
     return false;
   }
 };
+
+function parseLocation(places) {
+  places.forEach((place) => {
+    if (typeof place.location === "string") {
+      try {
+        // Replace single quotes with double quotes for valid JSON
+        const normalizedLocation = place.location.replace(/'/g, '"');
+        place.location = JSON.parse(normalizedLocation);
+      } catch (error) {
+        console.error("Error parsing location for place:", place.name, error);
+        place.location = null; // Mark invalid locations
+      }
+    }
+  });
+}
 
 function getRecommendations(preferences) {
   let recommendedPlaces = [...quizState.allPlaces];
@@ -315,6 +315,18 @@ async function initializeQuiz() {
       throw new Error("Could not find nearby coffee shops");
     }
 
+    // Parse locations to handle issues with single quotes
+    parseLocation(quizState.allPlaces);
+
+    // Log the parsed locations for debugging
+    console.log(
+      "Parsed Locations:",
+      quizState.allPlaces.map((place) => ({
+        name: place.name,
+        location: place.location,
+      }))
+    );
+
     // Show the quiz container and start the quiz
     console.log("Starting quiz display");
     document.getElementById("quiz-container").classList.remove("hidden");
@@ -399,15 +411,21 @@ async function saveQuizResults() {
     const numericalVector = encodeAnswers(quizState.answers, quizQuestions);
     console.log("Encoded Vector:", numericalVector);
 
-    // CSV file path
-    const csvFilePath = "../../coffee_shops.csv";
+    const response = await fetch(
+      "https://brew-match-production.up.railway.app/api/get-coffee-shops-csv"
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch coffee shop data");
+    }
+
+    const csvData = await response.text();
 
     // Parse CSV file
-    Papa.parse(csvFilePath, {
-      download: true,
-      header: true, // Treat first row as column names
+    Papa.parse(csvData, {
+      header: true,
       complete: function (results) {
-        const coffeeShops = results.data; // Parsed coffee shop data
+        const coffeeShops = results.data;
         console.log("Parsed Coffee Shops:", coffeeShops);
 
         // Continue with the next step: encode features
@@ -435,49 +453,34 @@ async function saveQuizResults() {
 }
 
 // Function to display top matches
-function displayMatches(topMatch) {
+function displayMatches(topMatches) {
   const outputContainer = document.getElementById("output");
   outputContainer.innerHTML = "<h2>Recommended Coffee Shops</h2>";
 
-  topMatch.forEach((match) => {
+  topMatches.forEach((match) => {
+    const { coffeeShop, combinedScore } = match;
+    const similarityScore = (combinedScore * 100).toFixed(2); // Convert to percentage for better readability
+
+    // Generate star ratings
+    const fullStars = Math.floor(coffeeShop.rating || 0);
+    const halfStar = (coffeeShop.rating || 0) - fullStars >= 0.5 ? "★" : "";
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    const starRating =
+      "★".repeat(fullStars) + halfStar + "☆".repeat(emptyStars);
+
     const matchDiv = document.createElement("div");
     matchDiv.className = "recommendation-card";
 
-    const similarityScore = (match.similarity * 100).toFixed(2); // Convert to percentage for better readability
-
     matchDiv.innerHTML = `
-      <h3 class="shop-name">${match.coffeeShop.name}</h3>
-      <p class="shop-address">${match.coffeeShop.formattedAddress}</p>
+      <h3 class="shop-name">${coffeeShop.name}</h3>
+      <p class="shop-address">${coffeeShop.formattedAddress}</p>
       ${
-        match.coffeeShop.rating
-          ? `<div class="shop-rating">${getEmojiRating(
-              match.coffeeShop.rating
-            )} (${match.coffeeShop.rating})</div>`
+        coffeeShop.rating
+          ? `<div class="shop-rating">Rating: ${starRating} (${coffeeShop.rating})</div>`
           : ""
       }
       <p class="shop-similarity">Similarity Score: ${similarityScore}%</p>
-      <button class="view-details-btn">View Details</button>
     `;
-
-    matchDiv
-      .querySelector(".view-details-btn")
-      .addEventListener("click", () => {
-        const placeData = {
-          id: match.coffeeShop.id,
-          name: match.coffeeShop.name,
-          address: match.coffeeShop.formattedAddress,
-          rating: match.coffeeShop.rating,
-          totalRatings: match.coffeeShop.userRatingCount,
-          priceLevel: match.coffeeShop.priceLevel,
-          phoneNumber: match.coffeeShop.internationalPhoneNumber,
-          website: match.coffeeShop.websiteUri,
-          currentOpeningHours: match.coffeeShop.currentOpeningHours,
-          location: match.coffeeShop.location,
-        };
-
-        sessionStorage.setItem("cafeData", JSON.stringify(placeData));
-        window.location.href = "cafe.html";
-      });
 
     outputContainer.appendChild(matchDiv);
   });
@@ -523,54 +526,25 @@ function processCoffeeShops(coffeeShops) {
         shop.servesDessert,
         shop.servesBreakfast
       );
-
       if (atmosphereIndex === null || foodIndex === null) {
-        return null;
+        return null; // Exclude shops with no valid atmosphere
       }
-
-      return {
-        encodedFeatures: [
-          encodeFeature(shop.priceLevel, ["1", "2", "3"]),
-          atmosphereIndex,
-          foodIndex,
-          encodeTiming(shop.currentOpeningHours),
-          encodeAccessibility(
-            shop.paymentOptions,
-            shop.accessibilityOptions,
-            shop.parkingOptions
-          ),
-        ],
-        // Store the original shop data
-        originalShop: {
-          id: shop.id,
-          name: shop.name,
-          formattedAddress: shop.formattedAddress,
-          currentOpeningHours: shop.currentOpeningHours,
-          rating: shop.rating,
-          userRatingCount: shop.userRatingCount,
-          priceLevel: shop.priceLevel,
-          currentOpeningHours: shop.currentOpeningHours,
-          location: shop.location,
-          internationalPhoneNumber: shop.internationalPhoneNumber,
-          websiteUri: shop.websiteUri,
-          types: shop.types,
-          businessStatus: shop.businessStatus,
-          servesCoffee: shop.servesCoffee,
-          servesDessert: shop.servesDessert,
-          servesBreakfast: shop.servesBreakfast,
-          takeout: shop.takeout,
-          delivery: shop.delivery,
-          dineIn: shop.dineIn,
-          reviews: shop.reviews,
-          paymentOptions: shop.paymentOptions,
-          parkingOptions: shop.parkingOptions,
-          accessibilityOptions: shop.accessibilityOptions,
-        },
-      };
+      return [
+        encodeFeature(shop.priceLevel, ["1", "2", "3"]),
+        atmosphereIndex, // Encoded atmosphere
+        foodIndex, // Encoded foodImportance
+        encodeTiming(shop.currentOpeningHours), // Logic for timing based on weekdayDescriptions
+        encodeAccessibility(
+          shop.paymentOptions,
+          shop.accessibilityOptions,
+          shop.parkingOptions
+        ), // Logic for accessibility
+      ];
     })
-    .filter((shop) => shop !== null);
+    .filter((shop) => shop !== null); // Remove excluded shops
 
   console.log("Encoded Coffee Shop Vectors:", encodedShops);
+
   return encodedShops;
 }
 
@@ -827,24 +801,79 @@ function cosineSimilarity(vec1, vec2) {
   return dotProduct / (magnitude1 * magnitude2);
 }
 
+function calculateDistance(location1, location2) {
+  // Normalize locations if they are strings with single quotes
+  if (typeof location1 === "string") {
+    location1 = JSON.parse(location1.replace(/'/g, '"'));
+  }
+  if (typeof location2 === "string") {
+    location2 = JSON.parse(location2.replace(/'/g, '"'));
+  }
+
+  // Validate locations
+  if (
+    !location1 ||
+    !location2 ||
+    !location1.latitude ||
+    !location1.longitude ||
+    !location2.latitude ||
+    !location2.longitude
+  ) {
+    console.error("Invalid location data:", location1, location2);
+    return NaN;
+  }
+
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = toRadians(location2.latitude - location1.latitude);
+  const dLon = toRadians(location2.longitude - location1.longitude);
+  const lat1 = toRadians(location1.latitude);
+  const lat2 = toRadians(location2.latitude);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in kilometers
+}
+
+// Helper function to convert degrees to radians
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
 function findBestMatch(userVector, shopVectors, coffeeShops, topN = 5) {
   const matches = [];
 
-  shopVectors.forEach((shopData) => {
-    console.log(shopData.originalShop.name, shopData.encodedFeatures);
+  shopVectors.forEach((shopVector, index) => {
+    const shop = coffeeShops[index];
 
-    const similarity = cosineSimilarity(userVector, shopData.encodedFeatures);
-    console.log(`Similarity with ${shopData.originalShop.name}:`, similarity);
+    // Calculate cosine similarity
+    const cosineSimilarityScore = cosineSimilarity(userVector, shopVector);
+
+    // Calculate distance, normalizing location if necessary
+    const distance = calculateDistance(quizState.location, shop.location);
+
+    if (isNaN(distance)) {
+      console.warn(`Skipping ${shop.name} due to invalid distance`);
+      return;
+    }
+
+    // Combine similarity and distance scores
+    const similarityWeight = 0.7;
+    const distanceWeight = 0.3;
+    const distanceScore = 1 / (1 + distance); // Normalize distance
+    const combinedScore =
+      similarityWeight * cosineSimilarityScore + distanceWeight * distanceScore;
 
     matches.push({
-      coffeeShop: shopData.originalShop,
-      similarity,
+      coffeeShop: shop,
+      combinedScore,
     });
   });
 
-  matches.sort((a, b) => b.similarity - a.similarity);
-  const topMatches = matches.slice(0, topN);
+  // Sort by combined score in descending order
+  matches.sort((a, b) => b.combinedScore - a.combinedScore);
 
-  console.log("Top Matches:", topMatches);
-  return topMatches;
+  // Return the top N matches
+  return matches.slice(0, topN);
 }
