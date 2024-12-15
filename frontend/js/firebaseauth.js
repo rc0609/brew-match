@@ -33,11 +33,21 @@ const app = initializeApp(firebaseConfig);
 
 const analytics = getAnalytics(app);
 
-function displayMessage(message, divId) {
+function displayMessage(message, divId, isError = false) {
   let msg = document.getElementById(divId);
   msg.classList.remove("hidden");
   msg.innerHTML = message;
   msg.style.opacity = 1;
+
+  if (isError) {
+    msg.style.color = "#dc2626";
+    msg.style.backgroundColor = "#fef2f2";
+    msg.style.border = "1px solid #fecaca";
+  } else {
+    msg.style.color = "#166534";
+    msg.style.backgroundColor = "#f0fdf4";
+    msg.style.border = "1px solid #bbf7d0";
+  }
 }
 
 const signUp = document.getElementById("signup-button");
@@ -72,9 +82,9 @@ signUp.addEventListener("click", (event) => {
     .catch((error) => {
       const errorCode = error.code;
       if (errorCode == "auth/email-already-in-use") {
-        showMessage("Email Address already in use", "signup-message");
+        displayMessage("Email Address already in use", "signup-message", true);
       } else {
-        showMessage("Unable to create user", "signup-message");
+        displayMessage("Unable to create user", "signup-message", true);
       }
     });
 });
@@ -88,7 +98,7 @@ signIn.addEventListener("click", (event) => {
 
   signInWithEmailAndPassword(auth, email, pWord)
     .then((userCredential) => {
-      displayMessage("Login Successfully", "login-message");
+      displayMessage("Login Successfully", "login-message", false);
       const user = userCredential.user;
       localStorage.setItem("loggedInUserId", user.uid);
       window.location.href = "/frontend/pages/homepage.html";
@@ -96,13 +106,12 @@ signIn.addEventListener("click", (event) => {
     .catch((error) => {
       const errorCode = error.code;
       if (errorCode === "auth/invalid-credential") {
-        displayMessage("Incorrect Email or Password", "login-message");
+        displayMessage("Incorrect Email or Password", "login-message", true);
       } else {
-        displayMessage("Account does not Exist", "login-message");
+        displayMessage("Account does not Exist", "login-message", true);
       }
     });
 });
-
 const guestSignInButton = document.getElementById("guest-signin-button");
 guestSignInButton.addEventListener("click", (event) => {
   event.preventDefault();
@@ -113,7 +122,7 @@ guestSignInButton.addEventListener("click", (event) => {
     .then(() => {
       // Signed in anonymously
       const user = auth.currentUser;
-      displayMessage("Signed in as Guest!", "guest-signin-message");
+      displayMessage("Signed in as Guest!", "guest-signin-message", false);
       localStorage.setItem("loggedInUserId", user.uid);
 
       // Create a user document if it doesn't exist
@@ -135,6 +144,6 @@ guestSignInButton.addEventListener("click", (event) => {
     .catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;
-      displayMessage(`Error: ${errorMessage}`, "guest-signin-message");
+      displayMessage(`Error: ${errorMessage}`, "guest-signin-message", true);
     });
 });
