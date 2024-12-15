@@ -619,6 +619,7 @@ function success(pos) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ coffee_shops: structuredPlaces }),
+          mode: "cors",
         }
       );
 
