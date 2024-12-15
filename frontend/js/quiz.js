@@ -436,37 +436,51 @@ async function saveQuizResults() {
 
 // Function to display top matches
 function displayMatches(topMatch) {
-  document.getElementById("output").innerHTML =
-    "<h2>Recommended Coffee Shops</h2>";
+  const outputContainer = document.getElementById("output");
+  outputContainer.innerHTML = "<h2>Recommended Coffee Shops</h2>";
 
   topMatch.forEach((match) => {
-    document.getElementById(
-      "output"
-    ).innerHTML += `<p>${match.coffeeShop.name}</p>`;
+    const matchDiv = document.createElement("div");
+    matchDiv.className = "recommendation-card";
+
+    const similarityScore = (match.similarity * 100).toFixed(2); // Convert to percentage for better readability
+
+    matchDiv.innerHTML = `
+      <h3 class="shop-name">${match.coffeeShop.name}</h3>
+      <p class="shop-address">${match.coffeeShop.formattedAddress}</p>
+      ${
+        match.coffeeShop.rating
+          ? `<div class="shop-rating">${getEmojiRating(
+              match.coffeeShop.rating
+            )} (${match.coffeeShop.rating})</div>`
+          : ""
+      }
+      <p class="shop-similarity">Similarity Score: ${similarityScore}%</p>
+      <button class="view-details-btn">View Details</button>
+    `;
+
+    matchDiv
+      .querySelector(".view-details-btn")
+      .addEventListener("click", () => {
+        const placeData = {
+          id: match.coffeeShop.id,
+          name: match.coffeeShop.name,
+          address: match.coffeeShop.formattedAddress,
+          rating: match.coffeeShop.rating,
+          totalRatings: match.coffeeShop.userRatingCount,
+          priceLevel: match.coffeeShop.priceLevel,
+          phoneNumber: match.coffeeShop.internationalPhoneNumber,
+          website: match.coffeeShop.websiteUri,
+          currentOpeningHours: match.coffeeShop.currentOpeningHours,
+          location: match.coffeeShop.location,
+        };
+
+        sessionStorage.setItem("cafeData", JSON.stringify(placeData));
+        window.location.href = "cafe.html";
+      });
+
+    outputContainer.appendChild(matchDiv);
   });
-
-  /* console.log('Top Matches:', topMatch); // Debug log
-  const recommendationsContainer = document.getElementById('recommendations-container');
-  const recommendationsList = document.getElementById('recommendations-list');
-  console.log('Recommendations Container:', recommendationsContainer); // Debug log
-  console.log('Recommendations List:', recommendationsList); // Debug log
-
-  // Clear existing content
-  recommendationsList.innerHTML = '';
-
-  // Show the container
-  recommendationsContainer.classList.remove('hidden');
-
-  if (topMatch.length === 0) {
-    recommendationsContainer.innerHTML = '<p>No matches found. Please try again!</p>';
-    return;
-  }
-
-  // Iterate through the top matches and generate HTML
-  topMatch.forEach((match) => {
-    console.log(match.coffeeShop.name);
-    recommendationsContainer.innerHTML = '<h3>${match.coffeeShop.name}</h3>';
-  });*/
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -509,25 +523,54 @@ function processCoffeeShops(coffeeShops) {
         shop.servesDessert,
         shop.servesBreakfast
       );
+
       if (atmosphereIndex === null || foodIndex === null) {
-        return null; // Exclude shops with no valid atmosphere
+        return null;
       }
-      return [
-        encodeFeature(shop.priceLevel, ["1", "2", "3"]),
-        atmosphereIndex, // Encoded atmosphere
-        foodIndex, // Encoded foodImportance
-        encodeTiming(shop.currentOpeningHours), // Logic for timing based on weekdayDescriptions
-        encodeAccessibility(
-          shop.paymentOptions,
-          shop.accessibilityOptions,
-          shop.parkingOptions
-        ), // Logic for accessibility
-      ];
+
+      return {
+        encodedFeatures: [
+          encodeFeature(shop.priceLevel, ["1", "2", "3"]),
+          atmosphereIndex,
+          foodIndex,
+          encodeTiming(shop.currentOpeningHours),
+          encodeAccessibility(
+            shop.paymentOptions,
+            shop.accessibilityOptions,
+            shop.parkingOptions
+          ),
+        ],
+        // Store the original shop data
+        originalShop: {
+          id: shop.id,
+          name: shop.name,
+          formattedAddress: shop.formattedAddress,
+          currentOpeningHours: shop.currentOpeningHours,
+          rating: shop.rating,
+          userRatingCount: shop.userRatingCount,
+          priceLevel: shop.priceLevel,
+          currentOpeningHours: shop.currentOpeningHours,
+          location: shop.location,
+          internationalPhoneNumber: shop.internationalPhoneNumber,
+          websiteUri: shop.websiteUri,
+          types: shop.types,
+          businessStatus: shop.businessStatus,
+          servesCoffee: shop.servesCoffee,
+          servesDessert: shop.servesDessert,
+          servesBreakfast: shop.servesBreakfast,
+          takeout: shop.takeout,
+          delivery: shop.delivery,
+          dineIn: shop.dineIn,
+          reviews: shop.reviews,
+          paymentOptions: shop.paymentOptions,
+          parkingOptions: shop.parkingOptions,
+          accessibilityOptions: shop.accessibilityOptions,
+        },
+      };
     })
-    .filter((shop) => shop !== null); // Remove excluded shops
+    .filter((shop) => shop !== null);
 
   console.log("Encoded Coffee Shop Vectors:", encodedShops);
-
   return encodedShops;
 }
 
@@ -785,27 +828,21 @@ function cosineSimilarity(vec1, vec2) {
 }
 
 function findBestMatch(userVector, shopVectors, coffeeShops, topN = 5) {
-  // Array to store similarity scores and their corresponding coffee shops
   const matches = [];
 
-  shopVectors.forEach((shopVector, index) => {
-    console.log(coffeeShops[index].name, shopVector, coffeeShops[index].id);
+  shopVectors.forEach((shopData) => {
+    console.log(shopData.originalShop.name, shopData.encodedFeatures);
 
-    // Calculate similarity
-    const similarity = cosineSimilarity(userVector, shopVector);
-    console.log(`Similarity with ${coffeeShops[index].name}:`, similarity);
+    const similarity = cosineSimilarity(userVector, shopData.encodedFeatures);
+    console.log(`Similarity with ${shopData.originalShop.name}:`, similarity);
 
-    // Add the shop and its similarity score to the matches array
     matches.push({
-      coffeeShop: coffeeShops[index],
+      coffeeShop: shopData.originalShop,
       similarity,
     });
   });
 
-  // Sort the matches by similarity score in descending order
   matches.sort((a, b) => b.similarity - a.similarity);
-
-  // Select the top N matches
   const topMatches = matches.slice(0, topN);
 
   console.log("Top Matches:", topMatches);

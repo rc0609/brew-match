@@ -60,10 +60,10 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     } catch (error) {
       console.error("Error parsing place data:", error);
-      window.location.href = "index.html";
+      window.location.href = "../../index.html";
     }
   } else {
-    window.location.href = "index.html";
+    window.location.href = "../../index.html";
   }
 });
 
