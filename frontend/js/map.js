@@ -612,7 +612,7 @@ function success(pos) {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/store-coffee-shops/",
+        "https://brew-match-production.up.railway.app/api/store-coffee-shops/",
         {
           method: "POST",
           headers: {

@@ -167,3 +167,9 @@ coffee_shops.csv
 package-lock.json
 package.json
 /config.js
+/config/config.js
+.firebase/hosting..cache
+/.firebase
+firebase.json
+.firebaserc
+404.html
